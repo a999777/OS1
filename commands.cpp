@@ -18,7 +18,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	char* cmd; 
 	char* args[MAX_ARG];
 	char pwd[MAX_LINE_SIZE];
-	char* delimiters = " \t\n";  
+	const char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = false; // illegal command
     	cmd = strtok(lineSize, delimiters);
@@ -91,7 +91,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
  		ExeExternal(args, cmdString);
 	 	return 0;
 	}
-	if (illegal_cmd == TRUE)
+	if (illegal_cmd == true)
 	{
 		printf("smash error: > \"%s\"\n", cmdString);
 		return 1;
@@ -126,6 +126,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 					*/
 			
 			default:
+				cout << "Just for debugging";
                 	// Add your code here
 					
 					/* 
@@ -163,7 +164,7 @@ int BgCmd(char* lineSize, void* jobs)
 {
 
 	char* Command;
-	char* delimiters = " \t\n";
+	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
