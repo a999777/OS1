@@ -3,9 +3,12 @@
 #include "commands.h"
 #include <unistd.h>
 #include <iostream>
+#include <string>
+#include <cstring>
 
 using std::cout;
 using std::endl;
+using std::string;
 
 //********************************************
 // function name: ExeCmd
@@ -13,7 +16,7 @@ using std::endl;
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(void* jobs, char* lineSize, char* cmdString)
+int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -37,27 +40,68 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 // ARE IN THIS CHAIN OF IF COMMANDS. PLEASE ADD
 // MORE IF STATEMENTS AS REQUIRED
 /*************************************************/
+
 	if (!strcmp(cmd, "cd") ) 
 	{
+		int ChangeDirRes = -1;
+		if(!getcwd(pwd,MAX_LINE_SIZE)) {
+			perror("getcwd error");
+		}
 
+		//verifying only 1 argument. An error should be print as illegal cmd
+		if(num_arg != 1) {
+			illegal_cmd = true;
+
+		} else if(!strcmp(args[1],"-")) {				//change to last dir
+			if(LastPath == NULL) {
+				illegal_cmd = true;
+			} else {
+				ChangeDirRes = chdir(LastPath);
+				if(ChangeDirRes == -1){ 		//Error occured
+					perror("chdir error");		//TODO The pdf says we should do a specific error.
+				} else {						//Directory change succeeded
+					cout << LastPath << endl;
+					strcpy(LastPath,pwd);
+					hist->addString(string("cd -"));
+				}
+			}
+
+		} else {								//Changing to a new path
+			ChangeDirRes = chdir(args[1]);
+			if(ChangeDirRes == -1){ 		//Error occured while switching
+				perror("chdir error");		//TODO
+			} else {						//Directory change succeeded
+				strcpy(LastPath,pwd);
+				cout << args[1] << endl;
+				string savedCmd = string("cd ");
+				savedCmd.append(args[1]);
+				hist->addString(savedCmd);
+			}
+		}
 	} 
 	
 	/*************************************************/
 	else if (!strcmp(cmd, "pwd")) 
 	{
-		if(num_arg != 0) {
+		if(num_arg != 0) {						//verifying no arguments
 			illegal_cmd = true;
 		} else if(!getcwd(pwd, MAX_LINE_SIZE)) { //Null means getcwd failed
-			illegal_cmd = true; //TODO I think it should have a perror value and not an illegal command
+			perror("getcwd error");
 		} else {								 //Meaning getcwd succeeded
 			cout << pwd << endl;
+			hist->addString(string("pwd"));
 		}
 	}
 	
 	/*************************************************/
-	else if (!strcmp(cmd, "mkdir"))
+	else if (!strcmp(cmd, "history"))
 	{
- 		
+ 		if(num_arg != 0) {
+ 			illegal_cmd = true;
+ 		} else {
+ 			hist->printAll();
+ 			cout << "Code gets here " << endl; //TODO DEBUGGING
+ 		}
 	}
 	/*************************************************/
 	

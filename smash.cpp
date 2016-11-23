@@ -10,12 +10,16 @@ main file. This file contains the main function of smash
 #include <signal.h>
 #include "commands.h"
 #include "signals.h"
+#include "JobsAndInfo.h"
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
 
 char* L_Fg_Cmd;
+
 void* jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
+
 char lineSize[MAX_LINE_SIZE]; 
+
 //**************************************************************************************
 // function name: main
 // Description: main function of smash. get command from user and calls command functions
@@ -23,11 +27,11 @@ char lineSize[MAX_LINE_SIZE];
 int main(int argc, char *argv[])
 {
     char cmdString[MAX_LINE_SIZE]; 	   
-
 	
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
 	 /* add your code here */
+
 	
 	/************************************/
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
@@ -38,6 +42,9 @@ int main(int argc, char *argv[])
 
 	/************************************/
 	// Init globals 
+
+    CmdHistory* hist = new CmdHistory();
+    char LastPath[MAX_LINE_SIZE];
 
 
 	
@@ -57,7 +64,7 @@ int main(int argc, char *argv[])
 					// background command	
 	 	if(!BgCmd(lineSize, jobs)) continue; 
 					// built in commands
-		ExeCmd(jobs, lineSize, cmdString);
+		ExeCmd(jobs, lineSize, cmdString, LastPath, hist);
 		
 		/* initialize for next line read*/
 		lineSize[0]='\0';
