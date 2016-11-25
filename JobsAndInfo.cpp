@@ -23,10 +23,11 @@ void CmdHistory::addString(string command) {
 }
 
 void CmdHistory::printAll() {
-	for(int i = 0; i <= this->_history.size() ; i++) {
-		cout << this->_history[i] << " command number " << i << endl;
+	vector<string>::iterator it = this->_history.begin();
+	while(it != this->_history.end()) {
+		cout << *it << endl;
+		it++;
 	}
-	//TODO something is causing segmentation fault here
 }
 
 

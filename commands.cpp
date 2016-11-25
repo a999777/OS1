@@ -100,7 +100,6 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
  			illegal_cmd = true;
  		} else {
  			hist->printAll();
- 			cout << "Code gets here " << endl; //TODO DEBUGGING
  		}
 	}
 	/*************************************************/
