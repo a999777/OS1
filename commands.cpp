@@ -100,6 +100,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
  			illegal_cmd = true;
  		} else {
  			hist->printAll();
+ 			hist->addString(string("history"));
  		}
 	}
 	/*************************************************/
@@ -131,7 +132,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(args, cmdString);
+ 		ExeExternal(args, cmdString, hist);
 	 	return 0;
 	}
 	if (illegal_cmd == true)
@@ -147,34 +148,29 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG], char* cmdString)
+void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 {
-	int pID;
+	int pID, status;
     	switch(pID = fork()) 
 	{
     		case -1: 
-					// Add your code here (error)
-					
-					/* 
-					your code
-					*/
+				//Error of "fork"
+    			perror("Failed to Create Child Process");
+    			exit(1);
         	case 0 :
-                	// Child Process
-               		setpgrp();
-					
-			        // Add your code here (execute an external command)
-					
-					/* 
-					your code
-					*/
-			
+                // Child Process. Changing the group id.
+               	setpgrp();
+			    // Execute an external command.
+               	execvp(args[0],args);
+				//If we got here that means execvp failed.
+               	perror("Failed to execute external command");
+               	exit(1);
 			default:
-				cout << "Just for debugging";
-                	// Add your code here
-					
-					/* 
-					your code
-					*/
+				//Father process. Saves the id of the child and wait for it to end
+				int ChildpID = pID;
+				waitpid(ChildpID, &status, WUNTRACED);
+				hist->addString(string(*args)); //TODO History does not show the arguments of the external command. Fix it
+				break;
 	}
 }
 //**************************************************************************************

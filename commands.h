@@ -15,6 +15,6 @@
 int ExeComp(char* lineSize);
 int BgCmd(char* lineSize, void* jobs);
 int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist);
-void ExeExternal(char *args[MAX_ARG], char* cmdString);
+void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist);
 #endif
 
