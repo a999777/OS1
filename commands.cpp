@@ -156,7 +156,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
     		case -1: 
 				//Error of "fork"
     			perror("Failed to Create Child Process");
-    			exit(1);
+    			exit(1); //Only father can run this (and die)
         	case 0 :
                 // Child Process. Changing the group id.
                	setpgrp();
