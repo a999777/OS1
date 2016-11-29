@@ -8,7 +8,8 @@
 #include <string.h>
 #include <signal.h>
 
-
+void handle_CTRL_z(int sig_num);
+void handle_CTRL_c(int sig_num);
 
 #endif
 
