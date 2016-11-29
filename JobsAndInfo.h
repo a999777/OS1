@@ -34,7 +34,7 @@ public:
 	int getNumberOfCommands();//used for jobs command
 };
 
-class Job {
+/*class Job {
 private:
 	vector <string> _parameters;
 public:
@@ -42,6 +42,6 @@ public:
 	void addString(string command);
 	void printAll();
 	int getNumberOfCommands();//used for jobs command
-};
+};*/
 
 #endif /* JOBSANDINFO_H_ */

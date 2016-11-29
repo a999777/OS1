@@ -9,7 +9,7 @@
 using std::cout;
 using std::endl;
 using std::string;
-#define CHECK_LARGER_OR_EQUAL(a, b) \
+
 #define PRINT_JOB(a, b , c, d) \
 	cout << "[" << a << "]" << b << " : " << c << " " << d << " secs" << endl; \
 
@@ -114,7 +114,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 			illegal_cmd = true;
 		} else {
 			//get jobs list
-			vector <string> _jobs;//FIXME
+			/*vector <string> _jobs;
 			vector<string>::iterator iter = this->_jobs.begin();
 			for (int i = 1; iter != this->_jobs.end(); i++) {
 				PRINT_JOB(i, *iter, )
@@ -126,7 +126,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 
 				cout << *iter << endl;
 				iter++;
-			}
+			}*/
 		}
 	}
 	/*************************************************/
