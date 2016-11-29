@@ -16,8 +16,6 @@ main file. This file contains the main function of smash
 
 char* L_Fg_Cmd;
 
-void* jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
-
 char lineSize[MAX_LINE_SIZE]; 
 
 //**************************************************************************************
@@ -45,7 +43,7 @@ int main(int argc, char *argv[])
 
     CmdHistory* hist = new CmdHistory();
     char LastPath[MAX_LINE_SIZE];
-
+    JobsVect* jobs = new JobsVect();
 
 	
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
@@ -62,7 +60,7 @@ int main(int argc, char *argv[])
 					// perform a complicated Command
 		if(!ExeComp(lineSize,hist)) continue;
 					// background command	
-	 	if(!BgCmd(lineSize, jobs)) continue; 
+	 	if(!BgCmd(lineSize, hist, jobs)) continue;
 					// built in commands
 		ExeCmd(jobs, lineSize, cmdString, LastPath, hist);
 		
