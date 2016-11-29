@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <time.h>
 //#include "Macros_Defines.h"//TODO
 
 #define ERROR_VALUE (-1)
@@ -35,14 +36,32 @@ public:
 	int getNumberOfCommands();//used for jobs command
 };
 
-/*class Job {
+class Job {
 private:
-	vector <string> _parameters;
+	string _cmdName;
+	int _pid;
+	long long int _insertTime;
 public:
-	void add(const char* command, );
-	void addString(string command);
+	Job(string name, int processId, long long int insTime) : _cmdName(name),
+								_pid(processId), _insertTime(insTime) {}
+	int getPid() {
+		return _pid;
+	}
+	string getName() {
+			return _cmdName;
+	}
+	long long int getTime() {
+			return (time(NULL) - _insertTime);
+	}
+};
+
+class JobsVect {
+private:
+	vector <Job> _allJobs;
+public:
+	void insertJob(string name, int processId);
+	void deleteJob(int processId);
 	void printAll();
-	int getNumberOfCommands();//used for jobs command
-};*/
+};
 
 #endif /* JOBSANDINFO_H_ */

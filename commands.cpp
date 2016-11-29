@@ -19,7 +19,7 @@ using std::string;
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
+int ExeCmd(JobsVect* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -114,19 +114,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 			illegal_cmd = true;
 		} else {
 			//get jobs list
-			/*vector <string> _jobs;
-			vector<string>::iterator iter = this->_jobs.begin();
-			for (int i = 1; iter != this->_jobs.end(); i++) {
-				PRINT_JOB(i, *iter, )
-				cout << "[" << i << "]" << *iter << " : " <<
-				//[1] a.out : 12340 214 secs
-				iter++;
-			}
-			while(iter != this->_jobs.end()) {
-
-				cout << *iter << endl;
-				iter++;
-			}*/
+			jobs->printAll();
 		}
 	}
 	/*************************************************/
@@ -278,21 +266,56 @@ int ExeComp(char* lineSize, CmdHistory* hist)
 // Parameters: command string, pointer to jobs
 // Returns: 0- BG command -1- if not
 //**************************************************************************************
-int BgCmd(char* lineSize, void* jobs)
+int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 {
 
 	char* Command;
 	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
-	if (lineSize[strlen(lineSize)-2] == '&')
-	{
+	if (lineSize[strlen(lineSize)-2] == '&') {//If it is a command to background
 		lineSize[strlen(lineSize)-2] = '\0';
-		// Add your code here (execute a in the background)
-					
-		/* 
-		your code
-		*/
 		
+		//If we get a complicated bg command
+		if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&"))) {
+			args[0] = "csh";
+			args[1] = "-f";
+			args[2] = "-c";
+			args[3] = lineSize;
+			args[4] = NULL; //Necessary for csh to work
+		} else {	//Otherwise we save the command
+			args[0] = strtok(lineSize, delimiters);
+			if (args[0] == NULL) {	//If we get an empty command we treat it as success
+				return 0;
+			}
+			for (int i = 1; i < MAX_ARG; i++) {	//We saave all the command parameters
+				args[i] = strtok(NULL, delimiters);
+			}
+		}
+
+	}
+	//Here we handle the command- put it in list and run it in bg
+	int pID;
+	switch(pID = fork()) {
+		case -1:
+	    	//Error of "fork"
+	       	perror("Failed to Create Child Process");
+	       	exit(1); //Only father can run this (and die)
+	    case 0 :
+	        // Child Process. Changing the group id.
+	        setpgrp();
+	        execvp(args[0],args);
+	  		//If we got here that means execvp failed.
+	        perror("Failed to execute external command");
+	        exit(1);
+	    default:
+	    	//Father process. Doesn't wait for the child to die
+	    	string savedCmd;
+	    	if(!strcmp(args[0],"csh")) {
+	    		savedCmd = (string)lineSize;
+	    	} else {
+	    		savedCmd = args[0];
+	    	}
+	    	jobs->insertJob(savedCmd,pID);
 	}
 	return -1;
 }
