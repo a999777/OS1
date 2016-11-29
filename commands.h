@@ -9,11 +9,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "JobsAndInfo.h"
-//#include "Macros_Defines.h"//TODO
 
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
-int ExeComp(char* lineSize);
+int ExeComp(char* lineSize, CmdHistory* hist);
 int BgCmd(char* lineSize, void* jobs);
 int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist);
 void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist);

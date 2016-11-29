@@ -9,7 +9,7 @@
 using std::cout;
 using std::endl;
 using std::string;
-#define CHECK_LARGER_OR_EQUAL(a, b) \
+
 #define PRINT_JOB(a, b , c, d) \
 	cout << "[" << a << "]" << b << " : " << c << " " << d << " secs" << endl; \
 
@@ -114,7 +114,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 			illegal_cmd = true;
 		} else {
 			//get jobs list
-			vector <string> _jobs;//FIXME
+			/*vector <string> _jobs;
 			vector<string>::iterator iter = this->_jobs.begin();
 			for (int i = 1; iter != this->_jobs.end(); i++) {
 				PRINT_JOB(i, *iter, )
@@ -126,7 +126,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 
 				cout << *iter << endl;
 				iter++;
-			}
+			}*/
 		}
 	}
 	/*************************************************/
@@ -195,7 +195,15 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
 				waitpid(ChildpID, &status, WUNTRACED);
-				hist->addString(string(*args)); //TODO History does not show the arguments of the external command. Fix it
+				int i =1;
+				string savedCmd = args[0];
+				while(args[i]) {
+					savedCmd += (string)(" ") + (string)(args[i]);
+					i++;
+				}
+				if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
+					hist->addString(savedCmd); //TODO History does not show the arguments of the external command. Fix it
+				}
 				break;
 	}
 }
@@ -205,18 +213,40 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 // Parameters: command string
 // Returns: 0- if complicated -1- if not
 //**************************************************************************************
-int ExeComp(char* lineSize)
+int ExeComp(char* lineSize, CmdHistory* hist)
 {
-	char ExtCmd[MAX_LINE_SIZE+2];
 	char *args[MAX_ARG];
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
-		// Add your code here (execute a complicated command)
-					
-		/* 
-		your code
-		*/
-	} 
+    	int pID, status;
+        switch(pID = fork()) {
+        	case -1:
+    			//Error of "fork"
+       			perror("Failed to Create Child Process");
+       			exit(1); //Only father can run this (and die)
+            case 0 :
+                // Child Process. Changing the group id.
+               	setpgrp();
+   			    // Execute an external complicated command through csh.
+               	args[0] = "csh";
+               	args[1] = "-f";
+               	args[2] = "-c";
+               	args[3]	= lineSize;
+               	args[4] = NULL; //Necessary for csh to work
+               	execvp(args[0],args);
+  				//If we got here that means execvp failed.
+               	perror("Failed to execute external command");
+            	exit(1);
+    		default:
+    			//Father process. Saves the id of the child and wait for it to end
+    			int ChildpID = pID;
+    			waitpid(ChildpID, &status, WUNTRACED);
+    			if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
+     				hist->addString(string(lineSize));
+    			}
+    			return 0;
+    	}
+    }
 	return -1;
 }
 //**************************************************************************************
