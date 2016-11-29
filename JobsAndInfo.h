@@ -15,6 +15,7 @@
 
 #define ERROR_VALUE (-1)
 #define HISTORY_MAX (51)
+#define SON_RUNNING (0)
 #define MAX_LINE_SIZE 80
 
 using std::vector;

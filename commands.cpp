@@ -151,9 +151,32 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
   		
 	}
 	/*************************************************/
+	//FIXME isn't working yet
 	else if (!strcmp(cmd, "quit"))
 	{
-   		
+		if (num_arg > 1) { //check 0<=num_arg<=1 (kill)
+			illegal_cmd = true;
+		} else if (num_arg == 0) {//kill all and quit smash
+			exit(0);//no need to release anything
+		} else if (strcmp(args[1], "kill")) {//make sure argument is "kill"
+			illegal_cmd = true;
+		} else { //quit kill ==> send kill request signal to all, 5 secs later force kill
+			//all this must be in loop over all jobs
+			//get all jobs func TODO amit
+			time_t timeFiveSeconds;
+			//kill(job.pid, SIGTERM);//FIXME
+			timeFiveSeconds = time(NULL);
+			cout << " – Sending SIGTERM... ";
+			while (difftime(time(NULL), timeFiveSeconds) < 5) {//wait 5 seconds
+				//wait 5 seconds
+			}
+			if (0) {//check if proccess isn't dead 5 seconds later
+				//kill(job.pid, SIGKILL);//FIXME
+				cout << "(5 sec passed) Sending SIGKILL…" << endl;
+			}
+			cout << "Done." << endl;
+			exit(0);
+		}
 	} 
 	/*************************************************/
 	else // external command
@@ -179,11 +202,11 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 	int pID, status;
     	switch(pID = fork()) 
 	{
-    		case -1: 
+    		case ERROR_VALUE:
 				//Error of "fork"
     			perror("Failed to Create Child Process");
     			exit(1); //Only father can run this (and die)
-        	case 0 :
+        	case SON_RUNNING :
                 // Child Process. Changing the group id.
                	setpgrp();
 			    // Execute an external command.
@@ -195,7 +218,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
 				waitpid(ChildpID, &status, WUNTRACED);
-				int i =1;
+				int i = 1;
 				string savedCmd = args[0];
 				while(args[i]) {
 					savedCmd += (string)(" ") + (string)(args[i]);
@@ -220,11 +243,11 @@ int ExeComp(char* lineSize, CmdHistory* hist)
     {
     	int pID, status;
         switch(pID = fork()) {
-        	case -1:
+        	case ERROR_VALUE:
     			//Error of "fork"
        			perror("Failed to Create Child Process");
        			exit(1); //Only father can run this (and die)
-            case 0 :
+            case SON_RUNNING :
                 // Child Process. Changing the group id.
                	setpgrp();
    			    // Execute an external complicated command through csh.
