@@ -9,6 +9,9 @@
 using std::cout;
 using std::endl;
 using std::string;
+#define CHECK_LARGER_OR_EQUAL(a, b) \
+#define PRINT_JOB(a, b , c, d) \
+	cout << "[" << a << "]" << b << " : " << c << " " << d << " secs" << endl; \
 
 //********************************************
 // function name: ExeCmd
@@ -43,7 +46,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 
 	if (!strcmp(cmd, "cd") ) 
 	{
-		int ChangeDirRes = -1;
+		int ChangeDirRes = ERROR_VALUE;
 		if(!getcwd(pwd,MAX_LINE_SIZE)) {
 			perror("getcwd error");
 		}
@@ -57,7 +60,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 				illegal_cmd = true;
 			} else {
 				ChangeDirRes = chdir(LastPath);
-				if(ChangeDirRes == -1){ 		//Error occured
+				if(ChangeDirRes == ERROR_VALUE){ 		//Error occured
 					perror("chdir error");		//TODO The pdf says we should do a specific error.
 				} else {						//Directory change succeeded
 					cout << LastPath << endl;
@@ -68,7 +71,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 
 		} else {								//Changing to a new path
 			ChangeDirRes = chdir(args[1]);
-			if(ChangeDirRes == -1){ 		//Error occured while switching
+			if(ChangeDirRes == ERROR_VALUE){ 		//Error occured while switching
 				perror("chdir error");		//TODO
 			} else {						//Directory change succeeded
 				strcpy(LastPath,pwd);
@@ -107,12 +110,35 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHisto
 	
 	else if (!strcmp(cmd, "jobs")) 
 	{
- 		
+		if(num_arg != 0) {
+			illegal_cmd = true;
+		} else {
+			//get jobs list
+			vector <string> _jobs;//FIXME
+			vector<string>::iterator iter = this->_jobs.begin();
+			for (int i = 1; iter != this->_jobs.end(); i++) {
+				PRINT_JOB(i, *iter, )
+				cout << "[" << i << "]" << *iter << " : " <<
+				//[1] a.out : 12340 214 secs
+				iter++;
+			}
+			while(iter != this->_jobs.end()) {
+
+				cout << *iter << endl;
+				iter++;
+			}
+		}
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "showpid")) 
 	{
-		
+		if(num_arg != 0) {						//verifying no arguments
+			illegal_cmd = true;
+		} else {
+			int smashPID = getpid();
+			cout << "smash pid is " << smashPID << endl;
+			hist->addString(string("showpid"));
+		}
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 

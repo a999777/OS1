@@ -10,14 +10,14 @@
 void CmdHistory::add(char const* command) {
 	string newCmd = string(command);
 	this->_history.push_back(newCmd);
-	if(this->_history.size() >= 51) {
+	if(this->_history.size() >= HISTORY_MAX) {
 		this->_history.erase(this->_history.begin());
 	}
 }
 
 void CmdHistory::addString(string command) {
 	this->_history.push_back(command);
-	if(this->_history.size() >= 51) {
+	if(this->_history.size() >= HISTORY_MAX) {
 		this->_history.erase(this->_history.begin());
 	}
 }
@@ -30,4 +30,7 @@ void CmdHistory::printAll() {
 	}
 }
 
+int CmdHistory::getNumberOfCommands() {
+	return (this->_history.size());
+}
 

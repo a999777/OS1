@@ -11,7 +11,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
+//#include "Macros_Defines.h"//TODO
 
+#define ERROR_VALUE (-1)
+#define HISTORY_MAX (51)
 #define MAX_LINE_SIZE 80
 
 using std::vector;
@@ -28,7 +31,17 @@ public:
 	void add(const char* command);
 	void addString(string command);
 	void printAll();
+	int getNumberOfCommands();//used for jobs command
 };
 
+class Job {
+private:
+	vector <string> _parameters;
+public:
+	void add(const char* command, );
+	void addString(string command);
+	void printAll();
+	int getNumberOfCommands();//used for jobs command
+};
 
 #endif /* JOBSANDINFO_H_ */
