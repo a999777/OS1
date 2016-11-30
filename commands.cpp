@@ -115,6 +115,7 @@ int ExeCmd(JobsVect* jobs, char* lineSize, char* cmdString, char* LastPath, CmdH
 		} else {
 			//get jobs list
 			jobs->printAll();
+			hist->addString(string("jobs"));
 		}
 	}
 	/*************************************************/
@@ -245,54 +246,41 @@ int ExeComp(char* lineSize, CmdHistory* hist)
 //**************************************************************************************
 int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 {
-
 	char* Command;
 	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&') {//If it is a command to background
 		lineSize[strlen(lineSize)-2] = '\0';
-		
-		//If we get a complicated bg command
-		if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&"))) {
-			args[0] = "csh";
-			args[1] = "-f";
-			args[2] = "-c";
-			args[3] = lineSize;
-			args[4] = NULL; //Necessary for csh to work
-		} else {	//Otherwise we save the command
-			args[0] = strtok(lineSize, delimiters);
-			if (args[0] == NULL) {	//If we get an empty command we treat it as success
-				return 0;
-			}
-			for (int i = 1; i < MAX_ARG; i++) {	//We saave all the command parameters
-				args[i] = strtok(NULL, delimiters);
-			}
+
+		//we save the command
+		args[0] = strtok(lineSize, delimiters);
+		if (args[0] == NULL) {	//If we get an empty command we treat it as success
+			return 0;
+		}
+		for (int i = 1; i < MAX_ARG; i++) {	//We save all the command parameters
+			args[i] = strtok(NULL, delimiters);
 		}
 
-	}
-	//Here we handle the command- put it in list and run it in bg
-	int pID;
-	switch(pID = fork()) {
-		case -1:
-	    	//Error of "fork"
-	       	perror("Failed to Create Child Process");
-	       	exit(1); //Only father can run this (and die)
-	    case 0 :
-	        // Child Process. Changing the group id.
-	        setpgrp();
-	        execvp(args[0],args);
-	  		//If we got here that means execvp failed.
-	        perror("Failed to execute external command");
-	        exit(1);
-	    default:
-	    	//Father process. Doesn't wait for the child to die
-	    	string savedCmd;
-	    	if(!strcmp(args[0],"csh")) {
-	    		savedCmd = (string)lineSize;
-	    	} else {
-	    		savedCmd = args[0];
-	    	}
-	    	jobs->insertJob(savedCmd,pID);
+		//Here we handle the command- put it in list and run it in bg
+		int pID;
+		switch(pID = fork()) {
+			case -1:
+		    	//Error of "fork"
+		       	perror("Failed to Create Child Process");
+		       	exit(1); //Only father can run this (and die)
+		    case 0 :
+		        // Child Process. Changing the group id.
+		        setpgrp();
+		        execvp(args[0],args);
+		  		//If we got here that means execvp failed.
+		        perror("Failed to execute external command");
+		        exit(1);
+		    default:
+		    	//Father process. Doesn't wait for the child to die.
+		    	jobs->insertJob(string(args[0]),pID);
+		    	hist->addString(string(args[0])); //Currently inserts also mistakes in bg TODO
+		    	return 0;
+		}
 	}
 	return -1;
 }

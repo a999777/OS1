@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <time.h>
+#include <sys/wait.h>
 //#include "Macros_Defines.h"//TODO
 
 #define ERROR_VALUE (-1)
@@ -39,9 +40,9 @@ class Job {
 private:
 	string _cmdName;
 	int _pid;
-	long long int _insertTime;
+	time_t _insertTime;
 public:
-	Job(string name, int processId, long long int insTime) : _cmdName(name),
+	Job(string name, int processId, time_t insTime) : _cmdName(name),
 								_pid(processId), _insertTime(insTime) {}
 	int getPid() {
 		return _pid;
@@ -49,7 +50,7 @@ public:
 	string getName() {
 			return _cmdName;
 	}
-	long long int getTime() {
+	time_t getTime() {
 			return (time(NULL) - _insertTime);
 	}
 };
@@ -60,7 +61,9 @@ private:
 public:
 	void insertJob(string name, int processId);
 	void deleteJob(int processId);
+	bool existJob(int processId);
 	void printAll();
+	void updateJobs();
 };
 
 #endif /* JOBSANDINFO_H_ */
