@@ -21,9 +21,9 @@ void handle_CTRL_z(int sig_num) {
 	if (jobs->isEmpty() == true) {// no processes in fg 
 		return;
 	}
-	else if (kill(jobs->newestJobPid(), SIGTSTP) == 0) {// 0 is successful
-		//TODO
-	} else {
+	else if (kill(jobs->newestJobPid(), SIGTSTP) == KILL_SUCCESS) {
+		
+	} else { //kill failed
 		//TODO
 	}
 	return;

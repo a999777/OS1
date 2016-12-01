@@ -23,9 +23,9 @@ void CmdHistory::printAll() {
 	}
 }
 
-void JobsVect::insertJob(string name, int processId) {
+void JobsVect::insertJob(string name, int processId, bool isSuspended) {
 	this->updateJobs();
-	Job* job = new Job(name, processId,time(NULL));
+	Job* job = new Job(name, processId,time(NULL), isSuspended);
 	if(this->_allJobs.size() >= 100) {
 		cout << "Too many jobs!" << endl;
 	} else {

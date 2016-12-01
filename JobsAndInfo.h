@@ -21,7 +21,7 @@
 #define HISTORY_MAX (51)
 #define CHILD_PROCESS (0)
 #define MAX_LINE_SIZE 80
-
+#define KILL_SUCCESS 0
 
 using std::vector;
 using std::string;
@@ -45,9 +45,10 @@ private:
 	string _cmdName;
 	int _pid;
 	time_t _insertTime;
+	bool _isSuspended;
 public:
-	Job(string name, int processId, time_t insTime) : _cmdName(name),
-								_pid(processId), _insertTime(insTime) {}
+	Job(string name, int processId, time_t insTime, bool isSuspended) : _cmdName(name),
+								_pid(processId), _insertTime(insTime), _isSuspended(isSuspended) {}
 	int getPid() {
 		return _pid;
 	}
@@ -63,7 +64,7 @@ class JobsVect {
 private:
 	vector <Job> _allJobs;
 public:
-	void insertJob(string name, int processId);
+	void insertJob(string name, int processId, bool isSuspended = false);
 	void deleteJob(int processId);
 	bool existJob(int processId);//TODO not implemented
 	void printAll();
