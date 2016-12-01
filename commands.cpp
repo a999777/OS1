@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <cctype>
 
 using std::cout;
 using std::endl;
@@ -132,7 +133,31 @@ int ExeCmd(JobsVect* jobs, char* lineSize, char* cmdString, char* LastPath, CmdH
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
 	{
-		
+		int pidTofg, status;
+		string nameTofg;
+		if(jobs->isEmpty()) {	//if there are no jobs
+			illegal_cmd = true;
+		} else {
+			if(num_arg == 0) {	//default, which means last job that was inserted
+				pidTofg = jobs->newestJobPidAndName(&nameTofg);
+			} else if(num_arg == 1) {	//regular case
+				if(isNum(args[1])) {	//if we are given a char that is not a number TODO checks only for digit??
+					cout << "Check if atoi fails " << endl;
+					illegal_cmd = true;
+				} else {
+					pidTofg = jobs->getPidAndNameByNum((atoi(args[1])-1),&nameTofg);
+				}
+			} else {	//if we get more than 1 argument
+				illegal_cmd = true;
+			}
+		}
+		if(!illegal_cmd) { //handle the fg move
+
+			/** TODO handle the suspended case? **/
+			cout << nameTofg << endl;
+			waitpid(pidTofg,&status,WUNTRACED);
+			hist->addString(string("fg"));
+		}
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
@@ -277,8 +302,12 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		        exit(1);
 		    default:
 		    	//Father process. Doesn't wait for the child to die.
-		    	jobs->insertJob(string(args[0]),pID);
-		    	hist->addString(string(args[0])); //Currently inserts also mistakes in bg TODO
+		    	string savedCmd = args[0];
+		    	for(int i = 1; args[i] != NULL ; i++) {
+		    		savedCmd += string(" ") + string(args[i]);
+		    	}
+		    	jobs->insertJob(savedCmd,pID);
+		    	hist->addString(savedCmd); //Currently inserts also mistakes in bg TODO
 		    	return 0;
 		}
 	}

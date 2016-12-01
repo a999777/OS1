@@ -68,3 +68,37 @@ void JobsVect::updateJobs() {
 	}
 }
 
+int JobsVect::newestJobPidAndName(string* str) {
+	this->updateJobs();
+	time_t mostRecentTime = this->_allJobs.begin()->getTime();
+	int mostRecentPid = this->_allJobs.begin()->getPid();
+	string mostRecentName;
+	vector<Job>::iterator it = this->_allJobs.begin();
+	while(it != this->_allJobs.end()) {
+		if(it->getTime() < mostRecentTime ) {
+				mostRecentTime = it->getTime();
+				mostRecentPid = it->getPid();
+				mostRecentName = it->getName();
+		}
+		it++;
+	}
+	*str = mostRecentName;
+	return mostRecentPid;
+}
+
+int JobsVect::getPidAndNameByNum(int num, string* str) {
+	*str = this->_allJobs[num].getName();
+	return this->_allJobs[num].getPid();
+}
+
+bool isNum(const char* str) {
+	if(!str) {
+		return false;
+	}
+	for(int i=0; str[i] != NULL ; i++) {
+		if(str[i] > 9 || str[i] < 0) {
+			return false;
+		}
+	}
+	return true;
+}

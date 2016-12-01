@@ -13,6 +13,7 @@
 #include <iostream>
 #include <time.h>
 #include <sys/wait.h>
+#include <cctype>
 //#include "Macros_Defines.h"//TODO
 
 #define ERROR_VALUE (-1)
@@ -64,6 +65,13 @@ public:
 	bool existJob(int processId);
 	void printAll();
 	void updateJobs();
+	int newestJobPidAndName(string* str);
+	int getPidAndNameByNum(int num, string* str);
+	bool isEmpty() {
+		return _allJobs.empty();
+	}
 };
+
+bool isNum(const char* str);
 
 #endif /* JOBSANDINFO_H_ */
