@@ -15,6 +15,7 @@
 // Returns: 
 //**************************************************************************************
 void handle_CTRL_z(int sig_num) {
+	assert(sig_num >= 0);//Make sure
 	
 	return;
 }

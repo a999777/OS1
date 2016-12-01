@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     CmdHistory* hist = new CmdHistory();
     char LastPath[MAX_LINE_SIZE];
     JobsVect* jobs = new JobsVect();
-
+	fgProcessID = NO_PROCESS_RUNNING;//marking fg proccess running
 	
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
 	if (L_Fg_Cmd == NULL) 

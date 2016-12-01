@@ -14,11 +14,14 @@
 #include <time.h>
 #include <sys/wait.h>
 #include <cctype>
-//#include "Macros_Defines.h"//TODO
 
 #define ERROR_VALUE (-1)
+#define NO_PROCESS_RUNNING (-1)
 #define HISTORY_MAX (51)
+#define CHILD_PROCESS (0)
 #define MAX_LINE_SIZE 80
+
+int fgProcessID;
 
 using std::vector;
 using std::string;
@@ -62,7 +65,7 @@ private:
 public:
 	void insertJob(string name, int processId);
 	void deleteJob(int processId);
-	bool existJob(int processId);
+	bool existJob(int processId);//TODO not implemented
 	void printAll();
 	void updateJobs();
 	int newestJobPidAndName(string* str);

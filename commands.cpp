@@ -11,6 +11,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
+
 #define PRINT_JOB(a, b , c, d) \
 	cout << "[" << a << "]" << b << " : " << c << " " << d << " secs" << endl; \
 
@@ -193,11 +194,11 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 	int pID, status;
     	switch(pID = fork()) 
 	{
-    		case -1: 
+    		case ERROR_VALUE: 
 				//Error of "fork"
     			perror("Failed to Create Child Process");
     			exit(1); //Only father can run this (and die)
-        	case 0 :
+        	case CHILD_PROCESS :
                 // Child Process. Changing the group id.
                	setpgrp();
 			    // Execute an external command.
@@ -208,7 +209,9 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 			default:
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
+				fgProcessID = pID;
 				waitpid(ChildpID, &status, WUNTRACED);
+				fgProcessID = NO_PROCESS_RUNNING;
 				int i =1;
 				string savedCmd = args[0];
 				while(args[i]) {
@@ -234,11 +237,11 @@ int ExeComp(char* lineSize, CmdHistory* hist)
     {
     	int pID, status;
         switch(pID = fork()) {
-        	case -1:
+        	case ERROR_VALUE:
     			//Error of "fork"
        			perror("Failed to Create Child Process");
        			exit(1); //Only father can run this (and die)
-            case 0 :
+            case CHILD_PROCESS :
                 // Child Process. Changing the group id.
                	setpgrp();
    			    // Execute an external complicated command through csh.
