@@ -11,12 +11,20 @@ main file. This file contains the main function of smash
 #include "commands.h"
 #include "signals.h"
 #include "JobsAndInfo.h"
+#include "smash.h"
+
+int fgProcessID;//Global TODO
+char fgCmdName[MAX_LINE_SIZE];//Global TODO
+//JobsVect* jobs;
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
+
+
 
 char* L_Fg_Cmd;
 
 char lineSize[MAX_LINE_SIZE]; 
+
 
 //**************************************************************************************
 // function name: main
@@ -44,19 +52,20 @@ int main(int argc, char *argv[])
     CmdHistory* hist = new CmdHistory();
     char LastPath[MAX_LINE_SIZE];
     JobsVect* jobs = new JobsVect();
-	fgProcessID = NO_PROCESS_RUNNING;//marking fg proccess running
-	
+	//fgProcessID = NO_PROCESS_RUNNING;//marking fg proccess running FIXME
+	//fgCmdName[0] = '\0'; FIXME
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
 	if (L_Fg_Cmd == NULL) 
 			exit (-1); 
 	L_Fg_Cmd[0] = '\0';
-	
     	while (1)
     	{
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);    	
 		cmdString[strlen(lineSize)-1]='\0';
+		//strcpy(fgCmdName, lineSize); FIXME
+		//fgCmdName[strlen(lineSize)-1]='\0'; FIXME
 					// perform a complicated Command
 		if(!ExeComp(lineSize,hist)) continue;
 					// background command	

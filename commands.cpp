@@ -7,6 +7,9 @@
 #include <cstring>
 #include <cctype>
 
+extern int fgProcessID;//Global FIXME
+extern char fgCmdName[MAX_LINE_SIZE];//Global FIXME
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -257,7 +260,9 @@ int ExeComp(char* lineSize, CmdHistory* hist)
     		default:
     			//Father process. Saves the id of the child and wait for it to end
     			int ChildpID = pID;
+			fgProcessID = pID;
     			waitpid(ChildpID, &status, WUNTRACED);
+			fgProcessID = NO_PROCESS_RUNNING;
     			if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
      				hist->addString(string(lineSize));
     			}

@@ -15,13 +15,13 @@
 #include <sys/wait.h>
 #include <cctype>
 
+
 #define ERROR_VALUE (-1)
 #define NO_PROCESS_RUNNING (-1)
 #define HISTORY_MAX (51)
 #define CHILD_PROCESS (0)
 #define MAX_LINE_SIZE 80
 
-int fgProcessID;
 
 using std::vector;
 using std::string;

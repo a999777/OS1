@@ -12,6 +12,9 @@
 
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
+
+
+
 int ExeComp(char* lineSize, CmdHistory* hist);
 int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs);
 int ExeCmd(JobsVect* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist);
