@@ -17,7 +17,7 @@
 
 int ExeComp(char* lineSize, CmdHistory* hist);
 int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs);
-int ExeCmd(JobsVect* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist);
+int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist);
 void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist);
 #endif
 

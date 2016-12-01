@@ -7,9 +7,7 @@
 #include <cstring>
 #include <cctype>
 
-extern int fgProcessID;//Global FIXME
-extern char fgCmdName[MAX_LINE_SIZE];//Global FIXME
-
+extern JobsVect* jobs;//Global
 using std::cout;
 using std::endl;
 using std::string;
@@ -24,7 +22,7 @@ using std::string;
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(JobsVect* jobs, char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
+int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -212,9 +210,9 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 			default:
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
-				fgProcessID = pID;
+				jobs->insertJob(string(cmdString), pID);
 				waitpid(ChildpID, &status, WUNTRACED);
-				fgProcessID = NO_PROCESS_RUNNING;
+				jobs->deleteJob(pID);
 				int i =1;
 				string savedCmd = args[0];
 				while(args[i]) {
@@ -260,9 +258,9 @@ int ExeComp(char* lineSize, CmdHistory* hist)
     		default:
     			//Father process. Saves the id of the child and wait for it to end
     			int ChildpID = pID;
-			fgProcessID = pID;
+			jobs->insertJob(string(lineSize), pID);
     			waitpid(ChildpID, &status, WUNTRACED);
-			fgProcessID = NO_PROCESS_RUNNING;
+			jobs->deleteJob(pID);
     			if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
      				hist->addString(string(lineSize));
     			}

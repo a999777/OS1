@@ -1,7 +1,7 @@
 /*
  * JobsAndInfo.h
  *
- *  Created on: 22 áðåá× 2016
+ *  Created on: 22 Ã¡Ã°Ã¥Ã¡Ã— 2016
  *      Author: Amit
  */
 
@@ -69,7 +69,6 @@ public:
 	void printAll();
 	void updateJobs();
 	int newestJobPidAndName(string* str);
-	int newestJobPid();
 	int getPidAndNameByNum(int num, string* str);
 	bool isEmpty() {
 		return _allJobs.empty();
