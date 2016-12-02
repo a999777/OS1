@@ -58,6 +58,9 @@ public:
 	time_t getTime() {
 			return (time(NULL) - _insertTime);
 	}
+	bool isSuspended() {
+		return _isSuspended;
+	}
 };
 
 class JobsVect {
@@ -71,6 +74,8 @@ public:
 	int newestJobPidAndName(string* str);
 	int newestJobPid();
 	int getPidAndNameByNum(int num, string* str);
+	int LastSuspendedPid();
+	string LastSuspendedName();
 	bool isEmpty() {
 		return _allJobs.empty();
 	}

@@ -167,7 +167,14 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-  		
+		int pidTobg, status;
+		string nameTobg;
+
+		if(num_arg == 0) {
+			//send the last foreground process to bg.
+		}
+
+
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
