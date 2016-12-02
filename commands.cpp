@@ -6,6 +6,7 @@
 #include <string>
 #include <cstring>
 #include <cctype>
+#include "signals.h"
 
 extern JobsVect* jobs;//Global
 extern string globalCmdName;//Global
@@ -179,6 +180,60 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 
 	}
 	/*************************************************/
+	else if (!strcmp(cmd, "kill"))
+	{
+		if(num_arg != 2 ) {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
+			illegal_cmd = true;
+		} else {
+			int sigToSend = atoi(strtok(args[1],"-"));
+			int idOfJob = atoi(args[2]);
+			Job wantedJob = jobs->getJobById(idOfJob);
+			string savedCmd = string(args[0]) + string(" ") + string(args[1]) +
+									string(" ") + string(args[2]); //To be saved in history
+
+			if(wantedJob.getPid() == NO_PROCESS_RUNNING) { //We got a NULL- meaning this id doesn't exist
+				cout << "smash error: > kill " << idOfJob << " - job does not exist"  << endl;
+			} else if(sigToSend > 31 || sigToSend < 1) {	//Meaning we got an illegal signal number
+				cout << "smash error: > kill " << idOfJob << " - cannot send signal"  << endl;
+			} else {
+				//Parameters are good if we got here.
+				if(kill(wantedJob.getPid(), sigToSend) != 0) { //0 means we succeeded
+					cout << "smash error: > kill " << idOfJob << " - cannot send signal"  << endl;
+				}
+				 // else if(sigToSend != SIGCONT && sigToSend != SIGTSTP && sigToSend != SIGSTOP
+				//		  && sigToSend != SIGINT) { //If the signal is legal but not one we know
+				else {
+					cout << "signal " << sigToSend << " was sent to pid " << wantedJob.getPid() << endl;
+					hist->addString(savedCmd);
+				}
+
+				//Now we handle the cases where the signal means something to us. Should we? or is that not needed?
+				  /*else if(sigToSend == SIGCONT) { //If we get a signal to continue- we resume the process
+					if(wantedJob.isSuspended()) {
+						jobs->deleteJob(wantedJob.getPid());
+					} else {
+						cout << "signal SIGCONT was sent to pid " << wantedJob.getPid() << endl;
+					}
+					hist->addString(savedCmd);
+				} else if(sigToSend == SIGTSTP || sigToSend == SIGSTOP) { //if we get a signal to stop - we use ctrl+z handler
+					if(!wantedJob.isSuspended()) { //if it is already suspended- we don't do anything
+						globalCmdName = wantedJob.getName();
+						globalCmdPID = wantedJob.getPid();
+						handle_CTRL_z(SIGTSTP);
+					} else {
+						cout << "signal " << sigToSend << " was sent to pid " << wantedJob.getPid() << endl;
+					}
+					hist->addString(savedCmd);
+				} else if(sigToSend == SIGINT) {
+					globalCmdName = wantedJob.getName();
+					globalCmdPID = wantedJob.getPid();
+					handle_CTRL_c(SIGINT);
+					hist->addString(savedCmd);
+				}*/
+			}
+		}
+	}
+	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
 	{
    		
@@ -229,7 +284,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 				int i =1;
 				string savedCmd = args[0];
 				while(args[i]) {
-					savedCmd += (string)(" ") + (string)(args[i]);
+					savedCmd += string(" ") + string(args[i]);
 					i++;
 				}
 				if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
@@ -275,9 +330,13 @@ int ExeComp(char* cmdString, CmdHistory* hist)
 				globalCmdName = cmdString;
 				waitpid(ChildpID, &status, WUNTRACED);
 				globalCmdPID = NO_PROCESS_RUNNING;
+				string savedCmd = string(cmdString);
+				savedCmd.erase(savedCmd.end() - 1);
+				savedCmd.append("\0"); //Those lines are added because when entering a complex command "Enter" is also pressed.
     			if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
-     				hist->addString(string(cmdString));
+     				hist->addString(string(savedCmd));
     			}
+    			cout << "Added complex " << (string)(savedCmd) <<" !" << endl;
     			return 0;
     	}
     }
