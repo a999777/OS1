@@ -13,6 +13,9 @@ main file. This file contains the main function of smash
 #include "JobsAndInfo.h"
 
 JobsVect* jobs;//Global
+char globalCmdName[MAX_LINE_SIZE];//Global
+int globalCmdPID;//Global
+
 
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
@@ -50,7 +53,9 @@ int main(int argc, char *argv[])
     CmdHistory* hist = new CmdHistory();
     char LastPath[MAX_LINE_SIZE];
     jobs = new JobsVect();
-	//fgProcessID = NO_PROCESS_RUNNING;//marking fg proccess running FIXME
+    globalCmdPID = NO_PROCESS_RUNNING;
+    globalCmdName[0] = '\0'; 
+    //fgProcessID = NO_PROCESS_RUNNING;//marking fg proccess running FIXME
 	//fgCmdName[0] = '\0'; FIXME
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
 	if (L_Fg_Cmd == NULL) 

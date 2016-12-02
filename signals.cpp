@@ -8,6 +8,8 @@
 #include "signals.h"
 
 extern JobsVect* jobs;//Global
+extern char* globalCmdName[MAX_LINE_SIZE];//Global
+extern int globalCmdPID;//Global
 
 //SIGTSTP
 //**************************************************************************************

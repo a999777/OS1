@@ -8,6 +8,9 @@
 #include <cctype>
 
 extern JobsVect* jobs;//Global
+extern char globalCmdName[MAX_LINE_SIZE];//Global
+extern int globalCmdPID;//Global
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -210,9 +213,10 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 			default:
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
-				jobs->insertJob(string(cmdString), pID);
+				globalCmdPID = pID;
+				strcpy(globalCmdName, cmdString);
 				waitpid(ChildpID, &status, WUNTRACED);
-				jobs->deleteJob(pID);
+				globalCmdPID = NO_PROCESS_RUNNING;
 				int i =1;
 				string savedCmd = args[0];
 				while(args[i]) {
@@ -231,10 +235,10 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 // Parameters: command string
 // Returns: 0- if complicated -1- if not
 //**************************************************************************************
-int ExeComp(char* lineSize, CmdHistory* hist)
+int ExeComp(char* cmdString, CmdHistory* hist)
 {
 	char *args[MAX_ARG];
-    if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
+    if ((strstr(cmdString, "|")) || (strstr(cmdString, "<")) || (strstr(cmdString, ">")) || (strstr(cmdString, "*")) || (strstr(cmdString, "?")) || (strstr(cmdString, ">>")) || (strstr(cmdString, "|&")))
     {
     	int pID, status;
         switch(pID = fork()) {
@@ -249,7 +253,7 @@ int ExeComp(char* lineSize, CmdHistory* hist)
                	args[0] = "csh";
                	args[1] = "-f";
                	args[2] = "-c";
-               	args[3]	= lineSize;
+               	args[3]	= cmdString;
                	args[4] = NULL; //Necessary for csh to work
                	execvp(args[0],args);
   				//If we got here that means execvp failed.
@@ -258,11 +262,12 @@ int ExeComp(char* lineSize, CmdHistory* hist)
     		default:
     			//Father process. Saves the id of the child and wait for it to end
     			int ChildpID = pID;
-			jobs->insertJob(string(lineSize), pID);
-    			waitpid(ChildpID, &status, WUNTRACED);
-			jobs->deleteJob(pID);
+				globalCmdPID = pID;
+				strcpy(globalCmdName, cmdString);
+				waitpid(ChildpID, &status, WUNTRACED);
+				globalCmdPID = NO_PROCESS_RUNNING;
     			if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
-     				hist->addString(string(lineSize));
+     				hist->addString(string(cmdString));
     			}
     			return 0;
     	}
