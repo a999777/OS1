@@ -145,8 +145,10 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			} else if (num_arg == 1) {	//A parameter for jobs list given
 				if (isNum(args[1])) {	//If we are given a char that is not a number
 					illegal_cmd = true;
+				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+					illegal_cmd = true;
 				} else {
-					jobToFg = jobs->getJobById(atoi(args[1])-1);//Return relevant job
+					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
 				illegal_cmd = true;
@@ -179,9 +181,35 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 
 	}
 	/*************************************************/
+	//FIXME currently has issue. suspended procs always take more that 5 seconds, so SIGKILL is sent.
+	//Is it normal? should this procs get SIGCONT first?
+	//FIXME We always wait 5 seconds for each proc of "quit kill", even if it ended beforehand. I think it's ok, you?
 	else if (!strcmp(cmd, "quit"))
 	{
-   		
+   		if (num_arg < 0 || num_arg > 1) {//Validate number of arguments
+   			illegal_cmd = true;
+   		} else if (num_arg == 0) { //normal quit
+   			exit(0);
+   		} else if (!(strcmp(args[1], "kill")) == false) { //there's an argument, but it's not kill
+   			illegal_cmd = true;
+   		} else { //quit kill
+   			int jobIndex = 1;//The job id in the vector
+   			Job currJob;
+   			while(jobs->isEmpty() != true) {//Go over all jobs vector
+   				currJob = jobs->getJobById(1);//Get first job in vector for each iteration
+				cout << "[" << jobIndex << "] " << currJob.getName() << "‫ –‬ ‫‪Sending‬‬ ‫‪SIGTERM...‬‬ ";
+				kill(currJob.getPid(), SIGTERM);//Try to let it kill itself
+				sleep(5);//Give the proc 5 seconds to kill itself
+				if(!(waitpid(currJob.getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
+					kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
+					cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
+				}
+				cout << "Done" << endl;
+				jobs->deleteJob(currJob.getPid());//Delete the job killed from the list
+				jobIndex++;//Advance the iterator showing the job id in job vector (not pid!)
+			}
+			exit(0);//FIXME should we end this way? faq doesn't point out what to do
+   		}
 	} 
 	/*************************************************/
 	else // external command
@@ -250,6 +278,10 @@ int ExeComp(char* cmdString, CmdHistory* hist)
     if ((strstr(cmdString, "|")) || (strstr(cmdString, "<")) || (strstr(cmdString, ">")) || (strstr(cmdString, "*")) || (strstr(cmdString, "?")) || (strstr(cmdString, ">>")) || (strstr(cmdString, "|&")))
     {
     	int pID, status;
+    	/*const char *args[MAX_ARG];
+    	args[0] = "csh";
+       	args[1] = "-f";
+       	args[2] = "-c";*/
         switch(pID = fork()) {
         	case ERROR_VALUE:
     			//Error of "fork"
@@ -264,7 +296,7 @@ int ExeComp(char* cmdString, CmdHistory* hist)
                	args[2] = "-c";
                	args[3]	= cmdString;
                	args[4] = NULL; //Necessary for csh to work
-               	execvp(args[0],args);
+               	execvp(args[0], args);
   				//If we got here that means execvp failed.
                	perror("Failed to execute external command");
             	exit(1);

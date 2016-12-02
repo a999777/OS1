@@ -84,12 +84,16 @@ public:
 		if(id == -1 ) {
 			return *(this->_allJobs.end() - 1);
 		} else {
-			return (this->_allJobs[id]);
+			//return (this->_allJobs[id]);// TODO notice the mistake we initialy made
+			return (this->_allJobs[id - 1]);
 		}
 	}
 	string LastSuspendedName();
 	bool isEmpty() {
 		return _allJobs.empty();
+	}
+	int size() {
+		return ((this->_allJobs).size());
 	}
 };
 
