@@ -137,28 +137,34 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	{
 		int pidTofg, status;
 		string nameTofg;
-		cout << "illegal_cmd is " << illegal_cmd << endl;
 		if(jobs->isEmpty()) {	//if there are no jobs
-			cout << "Jobs is Empty" << endl;
 			illegal_cmd = true;
 		} else {
 			if(num_arg == 0) {	//default, which means last job that was inserted
 				pidTofg = jobs->newestJobPidAndName(&nameTofg);
 			} else if(num_arg == 1) {	//regular case
 				if(isNum(args[1])) {	//if we are given a char that is not a number
-					cout << "Check if atoi fails " << endl;
 					illegal_cmd = true;
 				} else {
-					pidTofg = jobs->getPidAndNameByNum((atoi(args[1])-1),&nameTofg);
+					pidTofg = jobs->getPidAndNameByNum((atoi(args[1])-1),&nameTofg); // -1 since we are refering to the location in vector
 				}
 			} else {	//if we get more than 1 argument
 				illegal_cmd = true;
 			}
 		}
 		if(!illegal_cmd) { //handle the fg move
-
-			/** TODO handle the suspended case? **/
 			cout << nameTofg << endl;
+
+			//Handle suspended command
+			Job jobToFg = jobs->getJobById();
+			jobs->deleteJob(pidTofg); //jobs list will only show the most recent insertion time.
+			if(num_arg == 1) {
+				jobToFg = jobs->getJobById(atoi(args[1]-1));
+			}
+			if(jobToFg.isSuspended()) {
+				kill(pidTofg, SIGCONT);
+				cout << "signal SIGCONT was sent to pid " << pidTofg << endl;
+			}
 			globalCmdPID = pidTofg;
 			globalCmdName = nameTofg;
 			waitpid(pidTofg,&status,WUNTRACED);

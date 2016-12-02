@@ -79,6 +79,13 @@ public:
 	int newestJobPid();
 	int getPidAndNameByNum(int num, string* str);
 	int LastSuspendedPid();
+	Job getJobById(int id = -1) {
+		if(id == -1 ) {
+			return *(this->_allJobs.end() - 1);
+		} else {
+			return *(this->_allJobs[id]);
+		}
+	}
 	string LastSuspendedName();
 	bool isEmpty() {
 		return _allJobs.empty();
