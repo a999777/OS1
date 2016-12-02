@@ -222,7 +222,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
 				globalCmdPID = pID;
-				strcpy(globalCmdName, cmdString);
+				globalCmdName = cmdString;
 				waitpid(ChildpID, &status, WUNTRACED);
 				globalCmdPID = NO_PROCESS_RUNNING;
 				int i =1;
@@ -271,7 +271,7 @@ int ExeComp(char* cmdString, CmdHistory* hist)
     			//Father process. Saves the id of the child and wait for it to end
     			int ChildpID = pID;
 				globalCmdPID = pID;
-				strcpy(globalCmdName, cmdString);
+				globalCmdName = cmdString;
 				waitpid(ChildpID, &status, WUNTRACED);
 				globalCmdPID = NO_PROCESS_RUNNING;
     			if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally

@@ -8,7 +8,7 @@
 #include "signals.h"
 
 extern JobsVect* jobs;//Global
-extern char globalCmdName[MAX_LINE_SIZE];//Global
+extern string globalCmdName;//Global
 extern int globalCmdPID;//Global
 
 //SIGTSTP
@@ -28,7 +28,7 @@ void handle_CTRL_z(int sig_num) {
 		cout << "CTRL+Z: killed process" << endl; //TODO make better
 		cout << "signal SIGTSTP was sent to pid " << globalCmdPID << endl;
 		globalCmdPID = NO_PROCESS_RUNNING;
-		NO_JOB_STRING(globalCmdName);
+		//NO_JOB_STRING(globalCmdName);
 		//globalCmdName[0] = '\0'; // TODO make better
 	} else {
 		cout << "CTRL+Z: kill did not work" << endl; //TODO make better
@@ -53,7 +53,7 @@ void handle_CTRL_c(int sig_num) {
 		cout << "CTRL+C: killed process" << endl; //TODO make better
 		cout << "signal SIGINT was sent to pid " << globalCmdPID << endl;
 		globalCmdPID = NO_PROCESS_RUNNING;
-		NO_JOB_STRING(globalCmdName);			
+		//NO_JOB_STRING(globalCmdName);			
 		//globalCmdName[0] = '\0'; // TODO make better
 	} else {
 		cout << "CTRL+C: kill did not work" << endl; //TODO make better

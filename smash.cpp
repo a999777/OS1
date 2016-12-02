@@ -13,7 +13,7 @@ main file. This file contains the main function of smash
 #include "JobsAndInfo.h"
 
 JobsVect* jobs;//Global
-char globalCmdName[MAX_LINE_SIZE];//Global
+string globalCmdName;//Global
 int globalCmdPID;//Global
 
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     char LastPath[MAX_LINE_SIZE];
     jobs = new JobsVect();
     globalCmdPID = NO_PROCESS_RUNNING;
-    globalCmdName[0] = '\0'; 
+    //globalCmdName[0] = '\0'; //TODO
     while (1)
     {
     	printf("smash > ");
