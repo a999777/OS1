@@ -51,6 +51,7 @@ private:
 	time_t _insertTime;
 	bool _isSuspended;
 public:
+	Job() : _cmdName(),	_pid(NO_PROCESS_RUNNING), _insertTime(0), _isSuspended(false) {} //default
 	Job(string name, int processId, time_t insTime, bool isSuspended) : _cmdName(name),
 								_pid(processId), _insertTime(insTime), _isSuspended(isSuspended) {}
 	int getPid() {
@@ -83,7 +84,7 @@ public:
 		if(id == -1 ) {
 			return *(this->_allJobs.end() - 1);
 		} else {
-			return *(this->_allJobs[id]);
+			return (this->_allJobs[id]);
 		}
 	}
 	string LastSuspendedName();

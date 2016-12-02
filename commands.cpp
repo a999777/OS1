@@ -135,39 +135,34 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
 	{
-		int pidTofg, status;
-		string nameTofg;
-		if(jobs->isEmpty()) {	//if there are no jobs
+		int status;
+		Job jobToFg;//Job to run in fg
+		if (jobs->isEmpty()) {	//if there are no jobs
 			illegal_cmd = true;
 		} else {
 			if(num_arg == 0) {	//default, which means last job that was inserted
-				pidTofg = jobs->newestJobPidAndName(&nameTofg);
-			} else if(num_arg == 1) {	//regular case
-				if(isNum(args[1])) {	//if we are given a char that is not a number
+				jobToFg = jobs->getJobById();//Get last job in fg list
+			} else if (num_arg == 1) {	//A parameter for jobs list given
+				if (isNum(args[1])) {	//If we are given a char that is not a number
 					illegal_cmd = true;
 				} else {
-					pidTofg = jobs->getPidAndNameByNum((atoi(args[1])-1),&nameTofg); // -1 since we are refering to the location in vector
+					jobToFg = jobs->getJobById(atoi(args[1])-1);//Return relevant job
 				}
-			} else {	//if we get more than 1 argument
+			} else { //if we get more than 1 argument
 				illegal_cmd = true;
 			}
 		}
-		if(!illegal_cmd) { //handle the fg move
-			cout << nameTofg << endl;
-
-			//Handle suspended command
-			Job jobToFg = jobs->getJobById();
-			jobs->deleteJob(pidTofg); //jobs list will only show the most recent insertion time.
-			if(num_arg == 1) {
-				jobToFg = jobs->getJobById(atoi(args[1]-1));
+		if (!illegal_cmd) { //If command is legal
+			globalCmdPID = jobToFg.getPid();//save command pid for signals
+			globalCmdName = jobToFg.getName();//save command name for signals
+			cout << jobToFg.getName() << endl;//print job name
+			//Delete the job before running it in fg to initialize time
+			jobs->deleteJob(jobToFg.getPid()); //Remove from job list before running it
+			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up before waiting
+				kill(jobToFg.getPid(), SIGCONT);//Wake it up
+				cout << "signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
 			}
-			if(jobToFg.isSuspended()) {
-				kill(pidTofg, SIGCONT);
-				cout << "signal SIGCONT was sent to pid " << pidTofg << endl;
-			}
-			globalCmdPID = pidTofg;
-			globalCmdName = nameTofg;
-			waitpid(pidTofg,&status,WUNTRACED);
+			waitpid(jobToFg.getPid(), &status, WUNTRACED);
 			hist->addString(string("fg"));
 		}
 	} 
