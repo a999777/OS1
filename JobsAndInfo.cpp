@@ -50,7 +50,11 @@ void JobsVect::printAll() {
 	int counter = 1;
 	while(it != this->_allJobs.end()) {
 		cout << "[" << counter << "] " << it->getName() << " : "
-				 << it->getPid() << " " << it->getTime() << " secs" << endl;
+				 << it->getPid() << " " << it->getTime() << " secs" ;
+		if(it->isSuspended()) {
+			cout << " (Stopped)" ;
+		}
+		cout << endl;
 		it++;
 		counter++;
 	}
@@ -109,6 +113,36 @@ int JobsVect::newestJobPid() {
 int JobsVect::getPidAndNameByNum(int num, string* str) {
 	*str = this->_allJobs[num].getName();
 	return this->_allJobs[num].getPid();
+}
+
+int JobsVect::LastSuspendedPid() {
+	this->updateJobs();
+	int mostRecentPid = -1;
+	if(this->_allJobs.begin()->_isSuspended()) {
+		return this->_allJobs.begin()->getPid();
+	}
+	vector<Job>::iterator it = this->_allJobs.end() - 1;
+	while(it != this->_allJobs.begin()) {
+		if(it->isSuspended()) {
+			mostRecentPid = it->getPid();
+		}
+		it--;
+	}
+	return mostRecentPid;
+}
+
+string JobsVect::LastSuspendedName() {
+	int lastSuspendedPid = this->LastSuspendedPid();
+	if(lastSuspendedPid == -1) {
+		return NULL;
+	}
+	vector<Job>::iterator it = this->_allJobs.begin();
+	while(it != this->_allJobs.end()) {
+		if(it->getPid() == lastSuspendedPid ) {
+			return it->getName();
+		}
+		it++;
+	}
 }
 
 bool isNum(const char* str) {
