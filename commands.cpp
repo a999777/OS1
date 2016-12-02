@@ -47,7 +47,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 // MORE IF STATEMENTS AS REQUIRED
 /*************************************************/
 
-	if (!strcmp(cmd, "cd") ) 
+	if (!strcmp(cmd, "cd") ) //FIXME not good enough according to faq, look at the command error
 	{
 		int ChangeDirRes = ERROR_VALUE;
 		if(!getcwd(pwd,MAX_LINE_SIZE)) {
@@ -162,7 +162,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			jobs->deleteJob(jobToFg.getPid()); //Remove from job list before running it
 			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up before waiting
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
-				cout << "signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
+				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
 			}
 			waitpid(jobToFg.getPid(), &status, WUNTRACED);
 			hist->addString(string("fg"));
@@ -171,14 +171,39 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-		int pidTobg, status;
-		string nameTobg;
-
-		if(num_arg == 0) {
-			//send the last foreground process to bg.
+		int status;
+		Job jobToFg;//Job to run in bg
+		if (jobs->isEmpty()) {	//if there are no jobs
+			illegal_cmd = true;
+		} else {
+			if(num_arg == 0) {	//default, which means last job that was inserted
+				//First find the pid of the last job to be suspended in the vector, than return that job
+				jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job
+			} else if (num_arg == 1) {	//A parameter for jobs list given
+				if (isNum(args[1])) {	//If we are given a char that is not a number
+					illegal_cmd = true;
+				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+					illegal_cmd = true;
+				} else {
+					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
+				}
+			} else { //if we get more than 1 argument
+				illegal_cmd = true;
+			}
 		}
-
-
+		if (!illegal_cmd) { //If command is legal
+			//globalCmdPID = jobToFg.getPid();//save command pid for signals TODO not sure
+			//globalCmdName = jobToFg.getName();//save command name for signals TODO not sure
+			cout << jobToFg.getName() << endl;//print job name
+			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up
+				kill(jobToFg.getPid(), SIGCONT);//Wake it up
+				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
+				jobs->changeJobRemovalStatus(jobToFg.getPid());//Note the job is only in jobs vector untill it ends
+				hist->addString(string("bg"));
+			} else {//Not suspended, so no proccess to wake up. Selected job is already running
+				illegal_cmd = true;
+			}
+		}
 	}
 	/*************************************************/
 	//FIXME currently has issue. suspended procs always take more that 5 seconds, so SIGKILL is sent.
@@ -200,6 +225,8 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 				cout << "[" << jobIndex << "] " << currJob.getName() << "‫ –‬ ‫‪Sending‬‬ ‫‪SIGTERM...‬‬ ";
 				kill(currJob.getPid(), SIGTERM);//Try to let it kill itself
 				sleep(5);//Give the proc 5 seconds to kill itself
+				//FIXME update sleep according to: http://www.linuxprogrammingblog.com/all-about-linux-signals?page=show
+				//TODO "Simple example of signal aware code"
 				if(!(waitpid(currJob.getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
 					kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
 					cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
@@ -358,7 +385,7 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		    	for(int i = 1; args[i] != NULL ; i++) {
 		    		savedCmd += string(" ") + string(args[i]);
 		    	}
-		    	jobs->insertJob(savedCmd,pID);
+		    	jobs->insertJob(savedCmd, pID);
 		    	hist->addString(savedCmd); //Currently inserts also mistakes in bg TODO
 		    	return 0;
 		}
