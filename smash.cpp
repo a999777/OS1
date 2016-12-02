@@ -20,10 +20,6 @@ int globalCmdPID;//Global
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
 
-
-
-char* L_Fg_Cmd;
-
 char lineSize[MAX_LINE_SIZE]; 
 
 
@@ -55,25 +51,18 @@ int main(int argc, char *argv[])
     jobs = new JobsVect();
     globalCmdPID = NO_PROCESS_RUNNING;
     globalCmdName[0] = '\0'; 
-    //fgProcessID = NO_PROCESS_RUNNING;//marking fg proccess running FIXME
-	//fgCmdName[0] = '\0'; FIXME
-	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
-	if (L_Fg_Cmd == NULL) 
-			exit (-1); 
-	L_Fg_Cmd[0] = '\0';
-    	while (1)
-    	{
-	 	printf("smash > ");
+    while (1)
+    {
+    	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);    	
 		cmdString[strlen(lineSize)-1]='\0';
-		//strcpy(fgCmdName, lineSize); FIXME
-		//fgCmdName[strlen(lineSize)-1]='\0'; FIXME
-					// perform a complicated Command
+
+		// perform a complicated Command
 		if(!ExeComp(lineSize,hist)) continue;
-					// background command	
+		// background command
 	 	if(!BgCmd(lineSize, hist, jobs)) continue;
-					// built in commands
+	// built in commands
 		ExeCmd(lineSize, cmdString, LastPath, hist);
 		
 		/* initialize for next line read*/

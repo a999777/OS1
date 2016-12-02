@@ -66,7 +66,6 @@ private:
 public:
 	void insertJob(string name, int processId, bool isSuspended = false);
 	void deleteJob(int processId);
-	bool existJob(int processId);//TODO not implemented
 	void printAll();
 	void updateJobs();
 	int newestJobPidAndName(string* str);

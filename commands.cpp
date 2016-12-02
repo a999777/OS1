@@ -146,7 +146,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			if(num_arg == 0) {	//default, which means last job that was inserted
 				pidTofg = jobs->newestJobPidAndName(&nameTofg);
 			} else if(num_arg == 1) {	//regular case
-				if(isNum(args[1])) {	//if we are given a char that is not a number TODO checks only for digit??
+				if(isNum(args[1])) {	//if we are given a char that is not a number
 					cout << "Check if atoi fails " << endl;
 					illegal_cmd = true;
 				} else {
