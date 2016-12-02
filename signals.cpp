@@ -24,7 +24,7 @@ void handle_CTRL_z(int sig_num) {
 		return;
 	}
 	else if (kill(globalCmdPID, SIGTSTP) == KILL_SUCCESS) {
-		jobs.insertJob(globalCmdName, globalCmdPID, JOB_WAS_SUSPENDED);
+		jobs->insertJob(globalCmdName, globalCmdPID, JOB_WAS_SUSPENDED);
 		cout << "CTRL+Z: killed process" << endl; //TODO make better
 		cout << "signal SIGTSTP was sent to pid " << globalCmdPID << endl;
 		globalCmdPID = NO_PROCESS_RUNNING;
@@ -49,7 +49,7 @@ void handle_CTRL_c(int sig_num) {
 		return;
 	}
 	else if (kill(globalCmdPID, SIGINT) == KILL_SUCCESS) {
-		jobs.insertJob(globalCmdName, globalCmdPID, JOB_WAS_SUSPENDED);
+		jobs->insertJob(globalCmdName, globalCmdPID, JOB_WAS_SUSPENDED);
 		cout << "CTRL+C: killed process" << endl; //TODO make better
 		cout << "signal SIGINT was sent to pid " << globalCmdPID << endl;
 		globalCmdPID = NO_PROCESS_RUNNING;

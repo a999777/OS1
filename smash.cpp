@@ -33,7 +33,11 @@ int main(int argc, char *argv[])
 	
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
-	 /* add your code here */
+    struct sigaction Ctrl_C,Ctrl_Z;
+    Ctrl_C.sa_handler = &handle_CTRL_c;
+    Ctrl_Z.sa_handler = &handle_CTRL_z;
+	sigaction(SIGINT, &Ctrl_C, NULL);
+	sigaction(SIGTSTP, &Ctrl_Z, NULL);
 
 	
 	/************************************/

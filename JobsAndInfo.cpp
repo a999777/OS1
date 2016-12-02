@@ -118,7 +118,7 @@ int JobsVect::getPidAndNameByNum(int num, string* str) {
 int JobsVect::LastSuspendedPid() {
 	this->updateJobs();
 	int mostRecentPid = -1;
-	if(this->_allJobs.begin()->_isSuspended()) {
+	if(this->_allJobs.begin()->isSuspended()) {
 		return this->_allJobs.begin()->getPid();
 	}
 	vector<Job>::iterator it = this->_allJobs.end() - 1;

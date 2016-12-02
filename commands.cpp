@@ -8,7 +8,7 @@
 #include <cctype>
 
 extern JobsVect* jobs;//Global
-extern char globalCmdName[MAX_LINE_SIZE];//Global
+extern string globalCmdName;//Global
 extern int globalCmdPID;//Global
 
 using std::cout;
@@ -137,7 +137,9 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	{
 		int pidTofg, status;
 		string nameTofg;
+		cout << "illegal_cmd is " << illegal_cmd << endl;
 		if(jobs->isEmpty()) {	//if there are no jobs
+			cout << "Jobs is Empty" << endl;
 			illegal_cmd = true;
 		} else {
 			if(num_arg == 0) {	//default, which means last job that was inserted
@@ -157,6 +159,8 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 
 			/** TODO handle the suspended case? **/
 			cout << nameTofg << endl;
+			globalCmdPID = pidTofg;
+			globalCmdName = nameTofg;
 			waitpid(pidTofg,&status,WUNTRACED);
 			hist->addString(string("fg"));
 		}
