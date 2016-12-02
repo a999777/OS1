@@ -18,10 +18,14 @@
 
 #define ERROR_VALUE (-1)
 #define NO_PROCESS_RUNNING (-1)
+#define JOB_WAS_SUSPENDED (true)
 #define HISTORY_MAX (51)
 #define CHILD_PROCESS (0)
 #define MAX_LINE_SIZE 80
 #define KILL_SUCCESS 0
+
+#define NO_JOB_STRING(a) \
+	a[0] = '\0'; \
 
 using std::vector;
 using std::string;

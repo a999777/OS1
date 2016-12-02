@@ -16,9 +16,6 @@ using std::endl;
 using std::string;
 
 
-#define PRINT_JOB(a, b , c, d) \
-	cout << "[" << a << "]" << b << " : " << c << " " << d << " secs" << endl; \
-
 //********************************************
 // function name: ExeCmd
 // Description: interperts and executes built-in commands
