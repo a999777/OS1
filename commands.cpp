@@ -176,6 +176,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
 		Job jobToFg;//Job to run in bg
 		if (jobs->isEmpty()) {	//if there are no jobs
+			cout << "here 1" << endl;
 			illegal_cmd = true;
 		} else {
 			if(num_arg == 0) {	//default, which means last job that was inserted
@@ -183,13 +184,16 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 				jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job
 			} else if (num_arg == 1) {	//A parameter for jobs list given
 				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
+					cout << "here 2" << endl;
 					illegal_cmd = true;
 				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+					cout << "here 3" << endl;
 					illegal_cmd = true;
 				} else {
 					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
+				cout << "here 4" << endl;
 				illegal_cmd = true;
 			}
 		}
@@ -199,11 +203,12 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			cout << jobToFg.getName() << endl;//print job name
 			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
+				jobs->changeJobRemovalStatus(jobToFg.getPid());//Notify the job isn't suspended anymore
 				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
-				jobs->changeJobRemovalStatus(jobToFg.getPid());//Note the job is only in jobs vector untill it ends
 				hist->addString(string("bg"));
 			} else {//Not suspended, so no proccess to wake up. Selected job is already running
-				illegal_cmd = true;
+				//cout << "Job is already running in background" << endl; //TODO do we need output?
+				//No need for output or do any action
 			}
 		}
 	}
@@ -324,11 +329,6 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
                	exit(1);
 			default:
 				//Father process. Saves the id of the child and wait for it to end
-				int ChildpID = pID;
-				globalCmdPID = pID;
-				globalCmdName = cmdString;
-				waitpid(ChildpID, &status, WUNTRACED);
-				globalCmdPID = NO_PROCESS_RUNNING;
 				int i =1;
 				string savedCmd = args[0];
 				while(args[i]) {
@@ -338,6 +338,11 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 				if(WEXITSTATUS(status) == 0) {	//Meaning the child was terminated normally
 					hist->addString(savedCmd); //TODO History does not show the arguments of the external command. Fix it
 				}
+				int ChildpID = pID;
+				globalCmdPID = pID;
+				globalCmdName = cmdString;
+				waitpid(ChildpID, &status, WUNTRACED);
+				globalCmdPID = NO_PROCESS_RUNNING;
 				break;
 	}
 }

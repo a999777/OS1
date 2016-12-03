@@ -23,7 +23,7 @@ int globalCmdPID;//Global
 char lineSize[MAX_LINE_SIZE]; 
 
 void printNewLineForTests (char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist);//FIXME for script testing
-bool isTesting = true;// FIXME for testing
+bool isTesting = false;// FIXME for testing
 
 
 //**************************************************************************************
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
     globalCmdPID = NO_PROCESS_RUNNING;
     while (1)
     {
-    	//printf("smash > ");
-    	cout << "smash > ";//TODO maby
+    	printf("smash > ");
+    	//cout << "smash > ";//TODO maby
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		printNewLineForTests(lineSize, cmdString, LastPath, hist);//FIXME for script testing
 		/*if (isTesting == true) {

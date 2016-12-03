@@ -70,6 +70,9 @@ public:
 	void changeSuspStatus(bool change) {
 		this->_isSuspended = change;
 	}
+	void reverseSuspensionStatus() {
+		this->_isSuspended = ((_isSuspended == true) ? false : true);
+	}
 };
 
 class JobsVect {
@@ -109,7 +112,7 @@ public:
 		return id;
 	}
 	void changeJobRemovalStatus(int pid) {//TODO not sure
-		(this->_allJobs[getJobIDByPID(pid) - 1])._isWaitingToBeRemoved = true;
+		(this->_allJobs[getJobIDByPID(pid) - 1]).reverseSuspensionStatus();
 	}
 	
 	string LastSuspendedName();
