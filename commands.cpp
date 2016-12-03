@@ -55,7 +55,6 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		if (!getcwd(pwd,MAX_LINE_SIZE)) {
 			perror("getcwd error");
 		}
-
 		//verifying only 1 argument. An error should be print as illegal cmd
 		if (num_arg != 1) {
 			illegal_cmd = true;
