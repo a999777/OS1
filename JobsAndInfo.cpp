@@ -121,7 +121,8 @@ Job JobsVect::getJobById(int id) {
 		if(id == -1) {
 			return *(this->_allJobs.end() - 1);
 		} else {
-			if(id < 1 || id > this->_allJobs.size()) {
+			unsigned int unsignedID = id;
+			if(id < 1 || unsignedID > (this->_allJobs.size())) {
 				return Job();
 			}
 			return (this->_allJobs[id - 1]);
