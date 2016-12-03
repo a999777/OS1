@@ -189,7 +189,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			} else if (num_arg == 1) {		//A parameter for jobs list given
 				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
 					illegal_cmd = true;
-				} else if (atoi(args[1]) <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+				} else if (atoi(args[1]) <= 0 || atoi(args[1]) > jobs->size()) {//Check legal input
 					illegal_cmd = true;
 				} else {
 					savedCmd += string(args[1]);
@@ -203,8 +203,8 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			hist->addString(savedCmd);
 			cout << jobToFg.getName() << endl;	//print job name
 			if (jobToFg.isSuspended()) { 		//Handle suspended command, if suspended- wake it up
-				jobs->changeJobRemovalStatus(jobToFg.getPid());//Notify the job isn't suspended anymore
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
+				jobs->changeJobRemovalStatus(jobToFg.getPid());//Notify the job isn't suspended anymore
 				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
 			} else {//Not suspended, so no proccess to wake up. Selected job is already running
 				//No need for output or do any action
