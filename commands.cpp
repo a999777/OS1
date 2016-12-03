@@ -8,9 +8,9 @@
 #include <cctype>
 #include "signals.h"
 
-extern JobsVect* jobs;//Global
-extern string globalCmdName;//Global
-extern int globalCmdPID;//Global
+extern JobsVect* jobs;			//Global
+extern string globalCmdName;	//Global
+extern int globalCmdPID;		//Global
 
 using std::cout;
 using std::endl;
@@ -44,11 +44,8 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
  
 	}
 /*************************************************/
-// Built in Commands PLEASE NOTE NOT ALL REQUIRED
-// ARE IN THIS CHAIN OF IF COMMANDS. PLEASE ADD
-// MORE IF STATEMENTS AS REQUIRED
+// Built in Commands
 /*************************************************/
-
 	if (!strcmp(cmd, "cd")) //FIXME not good enough according to faq, look at the command error
 	{
 		int ChangeDirRes = ERROR_VALUE;
@@ -56,17 +53,16 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			perror("getcwd error");
 		}
 
-		//verifying only 1 argument. An error should be print as illegal cmd
+		//verifying only 1 argument. An error should be print as illegal command
 		if (num_arg != 1) {
 			illegal_cmd = true;
-
 		} else if (!strcmp(args[1],"-")) {				//change to last dir
 			if (LastPath == NULL) {
 				illegal_cmd = true;
 			} else {
 				ChangeDirRes = chdir(LastPath);
 				if (ChangeDirRes == ERROR_VALUE){ 		//Error occured
-					perror("chdir error");		//TODO The pdf says we should do a specific error.
+					perror("chdir error");
 				} else {						//Directory change succeeded
 					cout << LastPath << endl;
 					strcpy(LastPath,pwd);
@@ -77,7 +73,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		} else {								//Changing to a new path
 			ChangeDirRes = chdir(args[1]);
 			if (ChangeDirRes == ERROR_VALUE){ 		//Error occured while switching
-				perror("chdir error");		//TODO
+				perror("chdir error");		//TODO The pdf says we should do a specific error Like "path doesn't exist or so". Couldn't solve it yet.
 			} else {						//Directory change succeeded
 				strcpy(LastPath,pwd);
 				cout << args[1] << endl;
@@ -137,9 +133,11 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
 	{
-		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
+		jobs->updateJobs();// TODO Eitan- i don't think it should be here. Might cause some trouble (in a very rare case but still)
 		int status;
-		Job jobToFg;//Job to run in fg
+		Job jobToFg;			//Job to run in fg
+		string savedCmd = string("fg");
+
 		if (jobs->isEmpty()) {	//if there are no jobs
 			illegal_cmd = true;
 		} else {
@@ -148,47 +146,55 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			} else if (num_arg == 1) {	//A parameter for jobs list given
 				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
 					illegal_cmd = true;
-				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+				} else if (atoi(args[1]) <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
 					illegal_cmd = true;
 				} else {
+					savedCmd += string(args[1]);
 					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
 				illegal_cmd = true;
 			}
 		}
-		if (!illegal_cmd) { //If command is legal
-			globalCmdPID = jobToFg.getPid();//save command pid for signals
-			globalCmdName = jobToFg.getName();//save command name for signals
-			cout << jobToFg.getName() << endl;//print job name
+		if (!illegal_cmd) { 					//If command is legal
+			globalCmdPID = jobToFg.getPid();	//save command pid for signals
+			globalCmdName = jobToFg.getName();	//save command name for signals
+			cout << jobToFg.getName() << endl;	//print job name
+
 			//Delete the job before running it in fg to initialize time
 			jobs->deleteJob(jobToFg.getPid()); //Remove from job list before running it
-			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up before waiting
+
+			//Handle suspended command, if suspended- wake it up before waiting
+			if (jobToFg.isSuspended()) {
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
-				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
+				cout << "smash > signal SIGCONT was sent to pid " <<
+						jobToFg.getPid() << endl;
 			}
 			waitpid(jobToFg.getPid(), &status, WUNTRACED);
-			hist->addString(string("fg"));
+			hist->addString(savedCmd);
 		}
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
+		jobs->updateJobs();// TODO Again I believe it can cause some trouble.
 		int status;
-		Job jobToFg;//Job to run in bg
+		Job jobToFg;			//Job to run in bg
+		string savedCmd = string("bg");
+
 		if (jobs->isEmpty()) {	//if there are no jobs
 			illegal_cmd = true;
 		} else {
 			if(num_arg == 0) {	//default, which means last job that was inserted
 				//First find the pid of the last job to be suspended in the vector, than return that job
 				jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job
-			} else if (num_arg == 1) {	//A parameter for jobs list given
+			} else if (num_arg == 1) {		//A parameter for jobs list given
 				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
 					illegal_cmd = true;
-				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+				} else if (atoi(args[1]) <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
 					illegal_cmd = true;
 				} else {
+					savedCmd += string(args[1]);
 					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
@@ -196,13 +202,11 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			}
 		}
 		if (!illegal_cmd) { //If command is legal
-			//globalCmdPID = jobToFg.getPid();//save command pid for signals TODO not sure
-			//globalCmdName = jobToFg.getName();//save command name for signals TODO not sure
-			cout << jobToFg.getName() << endl;//print job name
-			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up
+			cout << jobToFg.getName() << endl;	//print job name
+			if (jobToFg.isSuspended()) { 		//Handle suspended command, if suspended- wake it up
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
 				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
-				jobs->changeJobRemovalStatus(jobToFg.getPid());//Note the job is only in jobs vector untill it ends
+				jobs->changeJobRemovalStatus(jobToFg.getPid());//Note the job is only in jobs vector until it ends
 				hist->addString(string("bg"));
 			} else {//Not suspended, so no proccess to wake up. Selected job is already running
 				illegal_cmd = true;

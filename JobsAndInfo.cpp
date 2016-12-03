@@ -7,7 +7,9 @@
 
 #include "JobsAndInfo.h"
 
-
+/**
+ * Adding a command to the history class using its name(and arguments)
+ */
 void CmdHistory::addString(string command) {
 	this->_history.push_back(command);
 	if (this->_history.size() >= HISTORY_MAX) {
@@ -15,6 +17,9 @@ void CmdHistory::addString(string command) {
 	}
 }
 
+/**
+ * A method for printing the entire history so far.
+ */
 void CmdHistory::printAll() {
 	vector<string>::iterator it = this->_history.begin();
 	while (it != this->_history.end()) {
@@ -23,6 +28,10 @@ void CmdHistory::printAll() {
 	}
 }
 
+/**
+ * A method for inserting a job. First it creates the job using the name and
+ * the pid, then inserts it.
+ */
 void JobsVect::insertJob(string name, int processId, bool isSuspended) {
 	this->updateJobs();
 	Job* job = new Job(name, processId,time(NULL), isSuspended);
@@ -33,6 +42,10 @@ void JobsVect::insertJob(string name, int processId, bool isSuspended) {
 	}
 }
 
+/**
+ * A method for deleting a job from the jobs vector which means deleting a job
+ * from the jobs list.
+ */
 void JobsVect::deleteJob(int processId) {
 	vector<Job>::iterator it = this->_allJobs.begin();
 	while (it != this->_allJobs.end()) {
@@ -44,6 +57,10 @@ void JobsVect::deleteJob(int processId) {
 	}
 }
 
+/**
+ * A method for printing the entire jobs vector. That means this is what we
+ * need to print when the user hits "jobs".
+ */
 void JobsVect::printAll() {
 	this->updateJobs();
 	vector<Job>::iterator it = this->_allJobs.begin();
@@ -60,6 +77,10 @@ void JobsVect::printAll() {
 	}
 }
 
+/**
+ * A method necessary in order to keep our jobs list correct. It checks if
+ * any process has ended(normally or due to some error) and removes it if so.
+ */
 void JobsVect::updateJobs() {
 	int status;
 	vector<Job>::iterator it = this->_allJobs.begin();
@@ -73,62 +94,10 @@ void JobsVect::updateJobs() {
 	}
 }
 
-//FIXME not entirely sure about this. meant to remove procceses which ended
-void JobsVect::removeZombies() {
-	int status;
-	vector<Job>::iterator iter = this->_allJobs.begin();
-	while (iter != this->_allJobs.end()) {
-		if (iter->_isWaitingToBeRemoved == true) {
-			if (!(waitpid(iter->getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
-				//kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
-				//cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
-			}
-		}
-		iter++;
-	}
-}
-
-int JobsVect::newestJobPidAndName(string* str) {
-	this->updateJobs();
-	time_t mostRecentTime = this->_allJobs.begin()->getTime();
-	int mostRecentPid = this->_allJobs.begin()->getPid();
-	string mostRecentName;
-	vector<Job>::iterator it = this->_allJobs.begin();
-	while (it != this->_allJobs.end()) {
-		if (it->getTime() < mostRecentTime ) {
-				mostRecentTime = it->getTime();
-				mostRecentPid = it->getPid();
-				mostRecentName = it->getName();
-		}
-		it++;
-	}
-	*str = mostRecentName;
-	return mostRecentPid;
-}
-
-int JobsVect::newestJobPid() {
-	this->updateJobs();
-	time_t mostRecentTime = this->_allJobs.begin()->getTime();
-	int mostRecentPid = this->_allJobs.begin()->getPid();
-	string mostRecentName;
-	vector<Job>::iterator it = this->_allJobs.begin();
-	while (it != this->_allJobs.end()) {
-		if (it->getTime() < mostRecentTime ) {
-				mostRecentTime = it->getTime();
-				mostRecentPid = it->getPid();
-				mostRecentName = it->getName();
-		}
-		it++;
-	}
-	return mostRecentPid;
-}
-
-
-int JobsVect::getPidAndNameByNum(int num, string* str) {
-	*str = this->_allJobs[num].getName();
-	return this->_allJobs[num].getPid();
-}
-
+/**
+ * A method for getting the latest suspended process. This is needed in order to
+ * enable the "fg" command with no arguments.
+ */
 int JobsVect::LastSuspendedPid() {
 	this->updateJobs();
 	int mostRecentPid = -1;
@@ -145,20 +114,40 @@ int JobsVect::LastSuspendedPid() {
 	return mostRecentPid;
 }
 
-string JobsVect::LastSuspendedName() {
-	int lastSuspendedPid = this->LastSuspendedPid();
-	if (lastSuspendedPid == -1) {
-		return NULL;
-	}
-	vector<Job>::iterator it = this->_allJobs.begin();
-	while (it != this->_allJobs.end()) {
-		if (it->getPid() == lastSuspendedPid ) {
-			return it->getName();
+/**
+ * A method for getting a job based on its location in the jobs list.
+ */
+Job JobVect::getJobById(int id) {
+		if(id == -1) {
+			return *(this->_allJobs.end() - 1);
+		} else {
+			if(id < 1 || id > this->_allJobs.size()) {
+				return Job();
+			}
+			return (this->_allJobs[id - 1]);
 		}
-		it++;
-	}
 }
 
+/**
+ * A method used for getting the Id of a process- i.e. the location in the list
+ * - using its pid. This method is required in order to implement another method.
+ */
+int JobsVect::getJobIDByPID(int pid) {
+	vector<Job>::iterator iter = this->_allJobs.begin();
+	int id = 1;
+	while(iter != this->_allJobs.end()) {
+		if(iter->getPid() == pid) {
+			break;
+		}
+		id++;
+		iter++;
+	}
+	return id;
+}
+
+/**
+ * A simple function for checking if a string represents a number.
+ */
 bool isNum(const char* str) {
 	if (!str) {
 		return false;

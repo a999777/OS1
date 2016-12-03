@@ -2,17 +2,16 @@
 #define _COMMANDS_H
 #include <unistd.h> 
 #include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
+#include <ctime>
+#include <cstdlib>
+#include <cstring>
 #include <signal.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "JobsAndInfo.h"
 
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
-
 
 
 int ExeComp(char* lineSize, CmdHistory* hist);
