@@ -67,6 +67,9 @@ public:
 	bool isSuspended() {
 		return _isSuspended;
 	}
+	void changeSuspStatus(bool change) {
+		this->_isSuspended = change;
+	}
 };
 
 class JobsVect {
@@ -116,6 +119,9 @@ public:
 		return ((this->_allJobs).size());
 	}
 	void removeZombies();
+	void changeSusStatusById(int id, bool state) {
+		this->_allJobs[id - 1].changeSuspStatus(state);
+	}
 };
 
 bool isNum(const char* str);
