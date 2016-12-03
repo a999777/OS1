@@ -174,7 +174,6 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	else if (!strcmp(cmd, "bg")) 
 	{
 		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
-		int status;
 		Job jobToFg;//Job to run in bg
 		if (jobs->isEmpty()) {	//if there are no jobs
 			illegal_cmd = true;
@@ -404,7 +403,6 @@ int ExeComp(char* cmdString, CmdHistory* hist)
 int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 {
 	jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
-	char* Command;
 	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&') {//If it is a command to background
