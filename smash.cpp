@@ -2,20 +2,19 @@
 main file. This file contains the main function of smash
 *******************************************************************/
 #include <sys/types.h>
+#include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h> 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
 #include "commands.h"
 #include "signals.h"
 #include "JobsAndInfo.h"
 
-JobsVect* jobs;//Global
-string globalCmdName;//Global
-int globalCmdPID;//Global
-
+JobsVect* jobs;				//Global
+string globalCmdName;		//Global
+int globalCmdPID;			//Global
 
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
@@ -28,33 +27,33 @@ bool isTesting = false;// FIXME for testing
 
 //**************************************************************************************
 // function name: main
-// Description: main function of smash. get command from user and calls command functions
+// Description: main function of smash. get command from user and calls command function
 //**************************************************************************************
 int main(int argc, char *argv[])
 {
     char cmdString[MAX_LINE_SIZE]; 	   
-	//signal declaretions
-	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
+	
+	//Signal declarations. We chose to implement using sigaction which means
+    //we need to use the sigaction struct.
     struct sigaction Ctrl_C,Ctrl_Z;
     Ctrl_C.sa_handler = &handle_CTRL_c;
     Ctrl_Z.sa_handler = &handle_CTRL_z;
 	sigaction(SIGINT, &Ctrl_C, NULL);
 	sigaction(SIGTSTP, &Ctrl_Z, NULL);
 
-	
-	/************************************/
-	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
-	//set your signal handlers here
-	/* add your code here */
-
 	/************************************/
 
-	/************************************/
-
+	// Init variables that goes to other modules.
     CmdHistory* hist = new CmdHistory();
     char LastPath[MAX_LINE_SIZE];
     jobs = new JobsVect();
     globalCmdPID = NO_PROCESS_RUNNING;
+
+    //globalCmdName[0] = '\0'; //TODO Eitan can that be removed?
+
+    /************************************/
+
+    //Heart of the program- the loop that catches and classifies the commands.
     while (1)
     {
     	printf("smash > ");

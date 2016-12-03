@@ -11,11 +11,11 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <time.h>
+#include <ctime>
 #include <sys/wait.h>
 #include <cctype>
 
-
+//Defining macros to be used throughout our program.
 #define ERROR_VALUE (-1)
 #define NO_PROCESS_RUNNING (-1)
 #define JOB_WAS_SUSPENDED (true)
@@ -24,14 +24,15 @@
 #define MAX_LINE_SIZE 80
 #define KILL_SUCCESS 0
 
-#define NO_JOB_STRING(a) \
-	a[0] = '\0'; \
-
 using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
 
+/**
+ * CmdHistory class. This class is used to save all the commands that we got
+ * (If they have the correct parameters).
+ */
 class CmdHistory {
 private:
 	vector <string> _history;
@@ -44,6 +45,11 @@ public:
 	int getNumberOfCommands();//used for jobs command
 };
 
+
+/**
+ * Job class. This class is used to store commands that goes to the background
+ * of our program. It enables different actions on its fields.
+ */
 class Job {
 private:
 	string _cmdName;
@@ -51,10 +57,11 @@ private:
 	time_t _insertTime;
 	bool _isSuspended;
 public:
-	bool _isWaitingToBeRemoved;
+
 	Job() : _cmdName(),	_pid(NO_PROCESS_RUNNING), _insertTime(0), _isSuspended(false), _isWaitingToBeRemoved(false) {} //default
 	Job(string name, int processId, time_t insTime, bool isSuspended, bool isWaitingToBeRemoved = false) : _cmdName(name),
 								_pid(processId), _insertTime(insTime), _isSuspended(isSuspended), _isWaitingToBeRemoved(isWaitingToBeRemoved) {}
+	bool _isWaitingToBeRemoved;
 	int getPid() {
 		return _pid;
 	}
@@ -75,6 +82,11 @@ public:
 	}
 };
 
+/**
+ * JobsVect class. This class is used to store the jobs that run in background.
+ * It is actually a "smart" std::vector that we use for our needs. "Get" methods
+ * are implemented here, and the more trickier ones are implemented in .cpp
+ */
 class JobsVect {
 private:
 	vector <Job> _allJobs;
@@ -83,39 +95,12 @@ public:
 	void deleteJob(int processId);
 	void printAll();
 	void updateJobs();
-	int newestJobPidAndName(string* str);
-	int newestJobPid();
-	int getPidAndNameByNum(int num, string* str);
 	int LastSuspendedPid();
-	Job getJobById(int id = -1) {
-		if(id == -1) {
-			return *(this->_allJobs.end() - 1);
-		} else {
-			unsigned int unsignedID = id;//To avoid warning of comparison between signed and unsigned TODO amit
-			if(id < 1 || unsignedID > (this->_allJobs.size())) {
-				return Job();
-			}
-			//return (this->_allJobs[id]);// TODO notice the mistake we initialy made
-			return (this->_allJobs[id - 1]);
-		}
-	}
-	int getJobIDByPID(int pid) {//TODO change to cpp
-		vector<Job>::iterator iter = this->_allJobs.begin();
-		int id = 1;
-		while(iter != this->_allJobs.end()) {
-			if(iter->getPid() == pid) {
-				break;
-			}
-			id++;
-			iter++;
-		}
-		return id;
-	}
+	Job getJobById(int id = -1);
+	int getJobIDByPID(int pid);
 	void changeJobRemovalStatus(int pid) {//TODO not sure
 		(this->_allJobs[getJobIDByPID(pid) - 1]).reverseSuspensionStatus();
 	}
-	
-	string LastSuspendedName();
 	bool isEmpty() {
 		return _allJobs.empty();
 	}
@@ -127,6 +112,9 @@ public:
 	}
 };
 
+/**
+ * Function used to determine if a string represents a number
+ */
 bool isNum(const char* str);
 
 #endif /* JOBSANDINFO_H_ */
