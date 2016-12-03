@@ -136,6 +136,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "fg")) 
 	{
+		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
 		int status;
 		Job jobToFg;//Job to run in fg
 		if (jobs->isEmpty()) {	//if there are no jobs
@@ -172,6 +173,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
+		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
 		int status;
 		Job jobToFg;//Job to run in bg
 		if (jobs->isEmpty()) {	//if there are no jobs
@@ -209,6 +211,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "kill"))
 	{
+		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
 		if(num_arg != 2 ) {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
 			illegal_cmd = true;
 		} else {
@@ -266,6 +269,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	//FIXME We always wait 5 seconds for each proc of "quit kill", even if it ended beforehand. I think it's ok, you?
 	else if (!strcmp(cmd, "quit"))
 	{
+		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
    		if (num_arg < 0 || num_arg > 1) {//Validate number of arguments
    			illegal_cmd = true;
    		} else if (num_arg == 0) { //normal quit
@@ -399,7 +403,7 @@ int ExeComp(char* cmdString, CmdHistory* hist)
     			return 0;
     	}
     }
-	return -1;
+	return ERROR_VALUE;
 }
 //**************************************************************************************
 // function name: BgCmd
@@ -409,6 +413,7 @@ int ExeComp(char* cmdString, CmdHistory* hist)
 //**************************************************************************************
 int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 {
+	jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
 	char* Command;
 	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
@@ -427,11 +432,11 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		//Here we handle the command- put it in list and run it in bg
 		int pID;
 		switch(pID = fork()) {
-			case -1:
+			case ERROR_VALUE:
 		    	//Error of "fork"
 		       	perror("Failed to Create Child Process");
 		       	exit(1); //Only father can run this (and die)
-		    case 0 :
+		    case CHILD_PROCESS :
 		        // Child Process. Changing the group id.
 		        setpgrp();
 		        execvp(args[0],args);
@@ -449,6 +454,6 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		    	return 0;
 		}
 	}
-	return -1;
+	return ERROR_VALUE;
 }
 

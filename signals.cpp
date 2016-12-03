@@ -61,22 +61,3 @@ void handle_CTRL_c(int sig_num) {
 
 //SIGSTOP sent by kill(), can't be intercepted by process
 //SIGCONT un-suspends the process (counterpart to SIGTSTP & SIGSTOP)
-
-//SIGCHLD
-void handle_sig_child(int sig_num) {
-	//assert(sig_num >= 0);//Make sure TODO
-	if (globalCmdPID == NO_PROCESS_RUNNING) {// no processes in fg 
-		cout << " CTRL+C: no processes in fg" << endl; //TODO make better
-		return;
-	}
-	else if (kill(globalCmdPID, SIGINT) == KILL_SUCCESS) {
-		jobs->insertJob(globalCmdName, globalCmdPID, JOB_WAS_SUSPENDED);
-		cout << " CTRL+C: killed process" << endl; //TODO make better
-		cout << "smash > signal SIGINT was sent to pid " << globalCmdPID << endl;
-		globalCmdPID = NO_PROCESS_RUNNING;
-	} else {
-		cout << "CTRL+C: kill did not work" << endl; //TODO make better
-	}
-	return;
-}
-//TODO we need to find a way to handle this
