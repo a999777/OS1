@@ -145,7 +145,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			if(num_arg == 0) {	//default, which means last job that was inserted
 				jobToFg = jobs->getJobById();//Get last job in fg list
 			} else if (num_arg == 1) {	//A parameter for jobs list given
-				if (isNum(args[1])) {	//If we are given a char that is not a number
+				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
 					illegal_cmd = true;
 				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
 					illegal_cmd = true;
@@ -183,7 +183,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 				//First find the pid of the last job to be suspended in the vector, than return that job
 				jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job
 			} else if (num_arg == 1) {	//A parameter for jobs list given
-				if (isNum(args[1])) {	//If we are given a char that is not a number
+				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
 					illegal_cmd = true;
 				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
 					illegal_cmd = true;

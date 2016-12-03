@@ -10,14 +10,14 @@
 
 void CmdHistory::addString(string command) {
 	this->_history.push_back(command);
-	if(this->_history.size() >= HISTORY_MAX) {
+	if (this->_history.size() >= HISTORY_MAX) {
 		this->_history.erase(this->_history.begin());
 	}
 }
 
 void CmdHistory::printAll() {
 	vector<string>::iterator it = this->_history.begin();
-	while(it != this->_history.end()) {
+	while (it != this->_history.end()) {
 		cout << *it << endl;
 		it++;
 	}
@@ -26,7 +26,7 @@ void CmdHistory::printAll() {
 void JobsVect::insertJob(string name, int processId, bool isSuspended) {
 	this->updateJobs();
 	Job* job = new Job(name, processId,time(NULL), isSuspended);
-	if(this->_allJobs.size() >= 100) {
+	if (this->_allJobs.size() >= 100) {
 		cout << "Too many jobs!" << endl;
 	} else {
 		this->_allJobs.push_back(*job);
@@ -35,8 +35,8 @@ void JobsVect::insertJob(string name, int processId, bool isSuspended) {
 
 void JobsVect::deleteJob(int processId) {
 	vector<Job>::iterator it = this->_allJobs.begin();
-	while(it != this->_allJobs.end()) {
-		if(it->getPid() == processId) {
+	while (it != this->_allJobs.end()) {
+		if (it->getPid() == processId) {
 			this->_allJobs.erase(it);
 			break;
 		}
@@ -48,10 +48,10 @@ void JobsVect::printAll() {
 	this->updateJobs();
 	vector<Job>::iterator it = this->_allJobs.begin();
 	int counter = 1;
-	while(it != this->_allJobs.end()) {
+	while (it != this->_allJobs.end()) {
 		cout << "[" << counter << "] " << it->getName() << " : "
 				 << it->getPid() << " " << it->getTime() << " secs" ;
-		if(it->isSuspended()) {
+		if (it->isSuspended()) {
 			cout << " (Stopped)" ;
 		}
 		cout << endl;
@@ -63,8 +63,8 @@ void JobsVect::printAll() {
 void JobsVect::updateJobs() {
 	int status;
 	vector<Job>::iterator it = this->_allJobs.begin();
-	while(it != this->_allJobs.end()) {
-		if(waitpid(it->getPid(),&status, WNOHANG) != 0 || WEXITSTATUS(status) == 1) {
+	while (it != this->_allJobs.end()) {
+		if (waitpid(it->getPid(),&status, WNOHANG) != 0 || WEXITSTATUS(status) == 1) {
 		//Using this syntax means we get 0 if the process with pid exists
 			this->deleteJob(it->getPid());
 			break;
@@ -77,9 +77,9 @@ void JobsVect::updateJobs() {
 void JobsVect::removeZombies() {
 	int status;
 	vector<Job>::iterator iter = this->_allJobs.begin();
-	while(iter != this->_allJobs.end()) {
+	while (iter != this->_allJobs.end()) {
 		if (iter->_isWaitingToBeRemoved == true) {
-			if(!(waitpid(iter->getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
+			if (!(waitpid(iter->getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
 				//kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
 				//cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
 			}
@@ -94,8 +94,8 @@ int JobsVect::newestJobPidAndName(string* str) {
 	int mostRecentPid = this->_allJobs.begin()->getPid();
 	string mostRecentName;
 	vector<Job>::iterator it = this->_allJobs.begin();
-	while(it != this->_allJobs.end()) {
-		if(it->getTime() < mostRecentTime ) {
+	while (it != this->_allJobs.end()) {
+		if (it->getTime() < mostRecentTime ) {
 				mostRecentTime = it->getTime();
 				mostRecentPid = it->getPid();
 				mostRecentName = it->getName();
@@ -112,8 +112,8 @@ int JobsVect::newestJobPid() {
 	int mostRecentPid = this->_allJobs.begin()->getPid();
 	string mostRecentName;
 	vector<Job>::iterator it = this->_allJobs.begin();
-	while(it != this->_allJobs.end()) {
-		if(it->getTime() < mostRecentTime ) {
+	while (it != this->_allJobs.end()) {
+		if (it->getTime() < mostRecentTime ) {
 				mostRecentTime = it->getTime();
 				mostRecentPid = it->getPid();
 				mostRecentName = it->getName();
@@ -132,12 +132,12 @@ int JobsVect::getPidAndNameByNum(int num, string* str) {
 int JobsVect::LastSuspendedPid() {
 	this->updateJobs();
 	int mostRecentPid = -1;
-	if(this->_allJobs.begin()->isSuspended()) {
+	if (this->_allJobs.begin()->isSuspended()) {
 		return this->_allJobs.begin()->getPid();
 	}
 	vector<Job>::iterator it = this->_allJobs.end() - 1;
-	while(it != this->_allJobs.begin()) {
-		if(it->isSuspended()) {
+	while (it != this->_allJobs.begin()) {
+		if (it->isSuspended()) {
 			mostRecentPid = it->getPid();
 		}
 		it--;
@@ -147,12 +147,12 @@ int JobsVect::LastSuspendedPid() {
 
 string JobsVect::LastSuspendedName() {
 	int lastSuspendedPid = this->LastSuspendedPid();
-	if(lastSuspendedPid == -1) {
+	if (lastSuspendedPid == -1) {
 		return NULL;
 	}
 	vector<Job>::iterator it = this->_allJobs.begin();
-	while(it != this->_allJobs.end()) {
-		if(it->getPid() == lastSuspendedPid ) {
+	while (it != this->_allJobs.end()) {
+		if (it->getPid() == lastSuspendedPid ) {
 			return it->getName();
 		}
 		it++;
@@ -160,11 +160,11 @@ string JobsVect::LastSuspendedName() {
 }
 
 bool isNum(const char* str) {
-	if(!str) {
+	if (!str) {
 		return false;
 	}
-	for(int i=0; str[i] != NULL ; i++) {
-		if(str[i] > 9 || str[i] < 0) {
+	for (int i = 0; str[i] != NULL ; i++) {
+		if(str[i] > '9' || str[i] < '0') {
 			return false;
 		}
 	}
