@@ -48,7 +48,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 // MORE IF STATEMENTS AS REQUIRED
 /*************************************************/
 
-	if (!strcmp(cmd, "cd") ) 
+	if (!strcmp(cmd, "cd") ) //FIXME not good enough according to faq, look at the command error
 	{
 		int ChangeDirRes = ERROR_VALUE;
 		if(!getcwd(pwd,MAX_LINE_SIZE)) {
@@ -146,8 +146,10 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			} else if (num_arg == 1) {	//A parameter for jobs list given
 				if (isNum(args[1])) {	//If we are given a char that is not a number
 					illegal_cmd = true;
+				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+					illegal_cmd = true;
 				} else {
-					jobToFg = jobs->getJobById(atoi(args[1])-1);//Return relevant job
+					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
 				illegal_cmd = true;
@@ -161,7 +163,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			jobs->deleteJob(jobToFg.getPid()); //Remove from job list before running it
 			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up before waiting
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
-				cout << "signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
+				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
 			}
 			waitpid(jobToFg.getPid(), &status, WUNTRACED);
 			hist->addString(string("fg"));
@@ -170,14 +172,39 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-		int pidTobg, status;
-		string nameTobg;
-
-		if(num_arg == 0) {
-			//send the last foreground process to bg.
+		int status;
+		Job jobToFg;//Job to run in bg
+		if (jobs->isEmpty()) {	//if there are no jobs
+			illegal_cmd = true;
+		} else {
+			if(num_arg == 0) {	//default, which means last job that was inserted
+				//First find the pid of the last job to be suspended in the vector, than return that job
+				jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job
+			} else if (num_arg == 1) {	//A parameter for jobs list given
+				if (isNum(args[1])) {	//If we are given a char that is not a number
+					illegal_cmd = true;
+				} else if (args[1] <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+					illegal_cmd = true;
+				} else {
+					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
+				}
+			} else { //if we get more than 1 argument
+				illegal_cmd = true;
+			}
 		}
-
-
+		if (!illegal_cmd) { //If command is legal
+			//globalCmdPID = jobToFg.getPid();//save command pid for signals TODO not sure
+			//globalCmdName = jobToFg.getName();//save command name for signals TODO not sure
+			cout << jobToFg.getName() << endl;//print job name
+			if (jobToFg.isSuspended()) { //Handle suspended command, if suspended- wake it up
+				kill(jobToFg.getPid(), SIGCONT);//Wake it up
+				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
+				jobs->changeJobRemovalStatus(jobToFg.getPid());//Note the job is only in jobs vector untill it ends
+				hist->addString(string("bg"));
+			} else {//Not suspended, so no proccess to wake up. Selected job is already running
+				illegal_cmd = true;
+			}
+		}
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "kill"))
@@ -234,9 +261,37 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		}
 	}
 	/*************************************************/
+	//FIXME currently has issue. suspended procs always take more that 5 seconds, so SIGKILL is sent.
+	//Is it normal? should this procs get SIGCONT first?
+	//FIXME We always wait 5 seconds for each proc of "quit kill", even if it ended beforehand. I think it's ok, you?
 	else if (!strcmp(cmd, "quit"))
 	{
-   		
+   		if (num_arg < 0 || num_arg > 1) {//Validate number of arguments
+   			illegal_cmd = true;
+   		} else if (num_arg == 0) { //normal quit
+   			exit(0);
+   		} else if (!(strcmp(args[1], "kill")) == false) { //there's an argument, but it's not kill
+   			illegal_cmd = true;
+   		} else { //quit kill
+   			int jobIndex = 1;//The job id in the vector
+   			Job currJob;
+   			while(jobs->isEmpty() != true) {//Go over all jobs vector
+   				currJob = jobs->getJobById(1);//Get first job in vector for each iteration
+				cout << "[" << jobIndex << "] " << currJob.getName() << "‫ –‬ ‫‪Sending‬‬ ‫‪SIGTERM...‬‬ ";
+				kill(currJob.getPid(), SIGTERM);//Try to let it kill itself
+				sleep(5);//Give the proc 5 seconds to kill itself
+				//FIXME update sleep according to: http://www.linuxprogrammingblog.com/all-about-linux-signals?page=show
+				//TODO "Simple example of signal aware code"
+				if(!(waitpid(currJob.getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
+					kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
+					cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
+				}
+				cout << "Done" << endl;
+				jobs->deleteJob(currJob.getPid());//Delete the job killed from the list
+				jobIndex++;//Advance the iterator showing the job id in job vector (not pid!)
+			}
+			exit(0);//FIXME should we end this way? faq doesn't point out what to do
+   		}
 	} 
 	/*************************************************/
 	else // external command
@@ -305,6 +360,10 @@ int ExeComp(char* cmdString, CmdHistory* hist)
     if ((strstr(cmdString, "|")) || (strstr(cmdString, "<")) || (strstr(cmdString, ">")) || (strstr(cmdString, "*")) || (strstr(cmdString, "?")) || (strstr(cmdString, ">>")) || (strstr(cmdString, "|&")))
     {
     	int pID, status;
+    	/*const char *args[MAX_ARG];
+    	args[0] = "csh";
+       	args[1] = "-f";
+       	args[2] = "-c";*/
         switch(pID = fork()) {
         	case ERROR_VALUE:
     			//Error of "fork"
@@ -319,7 +378,7 @@ int ExeComp(char* cmdString, CmdHistory* hist)
                	args[2] = "-c";
                	args[3]	= cmdString;
                	args[4] = NULL; //Necessary for csh to work
-               	execvp(args[0],args);
+               	execvp(args[0], args);
   				//If we got here that means execvp failed.
                	perror("Failed to execute external command");
             	exit(1);
@@ -385,7 +444,7 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		    	for(int i = 1; args[i] != NULL ; i++) {
 		    		savedCmd += string(" ") + string(args[i]);
 		    	}
-		    	jobs->insertJob(savedCmd,pID);
+		    	jobs->insertJob(savedCmd, pID);
 		    	hist->addString(savedCmd); //Currently inserts also mistakes in bg TODO
 		    	return 0;
 		}

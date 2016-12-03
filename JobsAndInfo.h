@@ -51,9 +51,10 @@ private:
 	time_t _insertTime;
 	bool _isSuspended;
 public:
-	Job() : _cmdName(),	_pid(NO_PROCESS_RUNNING), _insertTime(0), _isSuspended(false) {} //default
-	Job(string name, int processId, time_t insTime, bool isSuspended) : _cmdName(name),
-								_pid(processId), _insertTime(insTime), _isSuspended(isSuspended) {}
+	bool _isWaitingToBeRemoved;
+	Job() : _cmdName(),	_pid(NO_PROCESS_RUNNING), _insertTime(0), _isSuspended(false), _isWaitingToBeRemoved(false) {} //default
+	Job(string name, int processId, time_t insTime, bool isSuspended, bool isWaitingToBeRemoved = false) : _cmdName(name),
+								_pid(processId), _insertTime(insTime), _isSuspended(isSuspended), _isWaitingToBeRemoved(isWaitingToBeRemoved) {}
 	int getPid() {
 		return _pid;
 	}
@@ -87,13 +88,34 @@ public:
 			if(id < 1 || id > this->_allJobs.size()) {
 				return Job();
 			}
-			return (this->_allJobs[id]);
+			//return (this->_allJobs[id]);// TODO notice the mistake we initialy made
+			return (this->_allJobs[id - 1]);
 		}
 	}
+	int getJobIDByPID(int pid) {//TODO change to cpp
+		vector<Job>::iterator iter = this->_allJobs.begin();
+		int id = 1;
+		while(iter != this->_allJobs.end()) {
+			if(iter->getPid() == pid) {
+				break;
+			}
+			id++;
+			iter++;
+		}
+		return id;
+	}
+	void changeJobRemovalStatus(int pid) {//TODO not sure
+		(this->_allJobs[getJobIDByPID(pid) - 1])._isWaitingToBeRemoved = true;
+	}
+	
 	string LastSuspendedName();
 	bool isEmpty() {
 		return _allJobs.empty();
 	}
+	int size() {
+		return ((this->_allJobs).size());
+	}
+	void removeZombies();
 };
 
 bool isNum(const char* str);

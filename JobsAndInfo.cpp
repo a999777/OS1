@@ -1,7 +1,7 @@
 /*
  * JobsAndInfo.cpp
  *
- *  Created on: 23 áðåá× 2016
+ *  Created on: 23 Ã¡Ã°Ã¥Ã¡Ã— 2016
  *      Author: Amit
  */
 
@@ -73,6 +73,20 @@ void JobsVect::updateJobs() {
 	}
 }
 
+//FIXME not entirely sure about this. meant to remove procceses which ended
+void JobsVect::removeZombies() {
+	int status;
+	vector<Job>::iterator iter = this->_allJobs.begin();
+	while(iter != this->_allJobs.end()) {
+		if (iter->_isWaitingToBeRemoved == true) {
+			if(!(waitpid(iter->getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
+				//kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
+				//cout << "â€«â€«â€ª(5 sec passed) Sending SIGKILL... ";
+			}
+		}
+		iter++;
+	}
+}
 
 int JobsVect::newestJobPidAndName(string* str) {
 	this->updateJobs();
