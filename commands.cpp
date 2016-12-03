@@ -31,7 +31,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	const char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = false; // illegal command
-    	cmd = strtok(lineSize, delimiters);
+    cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL) {
 		return 0; 
 	}
