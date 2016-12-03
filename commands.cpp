@@ -227,39 +227,29 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 				cout << "smash error: > kill " << idOfJob << " - cannot send signal"  << endl;
 			} else {
 				//Parameters are good if we got here.
-				if(kill(wantedJob.getPid(), sigToSend) != 0) { //0 means we succeeded
-					cout << "smash error: > kill " << idOfJob << " - cannot send signal"  << endl;
-				}
-				 // else if(sigToSend != SIGCONT && sigToSend != SIGTSTP && sigToSend != SIGSTOP
-				//		  && sigToSend != SIGINT) { //If the signal is legal but not one we know
-				else {
-					cout << "signal " << sigToSend << " was sent to pid " << wantedJob.getPid() << endl;
-					hist->addString(savedCmd);
-				}
 
-				//Now we handle the cases where the signal means something to us. Should we? or is that not needed?
-				  /*else if(sigToSend == SIGCONT) { //If we get a signal to continue- we resume the process
-					if(wantedJob.isSuspended()) {
-						jobs->deleteJob(wantedJob.getPid());
-					} else {
-						cout << "signal SIGCONT was sent to pid " << wantedJob.getPid() << endl;
-					}
-					hist->addString(savedCmd);
-				} else if(sigToSend == SIGTSTP || sigToSend == SIGSTOP) { //if we get a signal to stop - we use ctrl+z handler
-					if(!wantedJob.isSuspended()) { //if it is already suspended- we don't do anything
-						globalCmdName = wantedJob.getName();
-						globalCmdPID = wantedJob.getPid();
-						handle_CTRL_z(SIGTSTP);
-					} else {
-						cout << "signal " << sigToSend << " was sent to pid " << wantedJob.getPid() << endl;
-					}
-					hist->addString(savedCmd);
-				} else if(sigToSend == SIGINT) {
+				//Handling the case where those are signals we know
+				if(sigToSend == SIGINT || sigToSend == SIGTSTP) {
 					globalCmdName = wantedJob.getName();
 					globalCmdPID = wantedJob.getPid();
-					handle_CTRL_c(SIGINT);
 					hist->addString(savedCmd);
-				}*/
+					jobs->deleteJob(wantedJob.getPid()); //This line is added to prevent "jobs" duplications
+					if(sigToSend == SIGINT) {
+						handle_CTRL_c(SIGINT);
+					} else {
+						handle_CTRL_z(SIGTSTP);
+					}
+				} else {
+					if(kill(wantedJob.getPid(), sigToSend) != 0) { //0 means we succeeded
+						cout << "smash error: > kill " << idOfJob << " - cannot send signal"  << endl;
+					} else {
+						cout << "signal " << sigToSend << " was sent to pid " << wantedJob.getPid() << endl;
+						hist->addString(savedCmd);
+						if(sigToSend == SIGCONT && wantedJob.isSuspended()) {
+							jobs->changeSusStatusById(idOfJob, false);
+						}
+					}
+				}
 			}
 		}
 	}
