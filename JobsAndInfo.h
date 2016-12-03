@@ -1,7 +1,7 @@
 /*
  * JobsAndInfo.h
  *
- *  Created on: 22 бребЧ 2016
+ *  Created on: 22 пїЅпїЅпїЅпїЅпїЅ 2016
  *      Author: Amit
  */
 
@@ -88,7 +88,8 @@ public:
 		if(id == -1) {
 			return *(this->_allJobs.end() - 1);
 		} else {
-			if(id < 1 || id > this->_allJobs.size()) {
+			unsigned int unsignedID = id;//To avoid warning of comparison between signed and unsigned TODO amit
+			if(id < 1 || unsignedID > (this->_allJobs.size())) {
 				return Job();
 			}
 			//return (this->_allJobs[id]);// TODO notice the mistake we initialy made
@@ -118,7 +119,6 @@ public:
 	int size() {
 		return ((this->_allJobs).size());
 	}
-	void removeZombies();
 	void changeSusStatusById(int id, bool state) {
 		this->_allJobs[id - 1].changeSuspStatus(state);
 	}

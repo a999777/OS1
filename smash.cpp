@@ -57,7 +57,8 @@ int main(int argc, char *argv[])
     //globalCmdName[0] = '\0'; //TODO
     while (1)
     {
-    	printf("smash > ");
+    	//printf("smash > ");
+    	cout << "smash > ";//TODO maby
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);    	
 		cmdString[strlen(lineSize)-1]='\0';
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
 		/* initialize for next line read*/
 		lineSize[0]='\0';
 		cmdString[0]='\0';
+		fflush(stdout);//TODO maby
 	}
     return 0;
 }
