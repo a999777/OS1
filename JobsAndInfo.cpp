@@ -117,7 +117,7 @@ int JobsVect::LastSuspendedPid() {
 /**
  * A method for getting a job based on its location in the jobs list.
  */
-Job JobVect::getJobById(int id) {
+Job JobsVect::getJobById(int id) {
 		if(id == -1) {
 			return *(this->_allJobs.end() - 1);
 		} else {

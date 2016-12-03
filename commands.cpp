@@ -218,7 +218,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	else if (!strcmp(cmd, "kill"))
 	{
 		jobs->updateJobs();//Again, probably not needed
-		if(num_arg != 2 || (*args[1])[0] != "-") {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
+		if(num_arg != 2 ) {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
 			illegal_cmd = true;
 		} else {
 			int sigToSend = atoi(strtok(args[1],"-"));
@@ -372,10 +372,10 @@ int ExeComp(char* cmdString, CmdHistory* hist)
                 // Child Process. Changing the group id.
                	setpgrp();
    			    // Execute an external complicated command through csh.
-               	args[0] = "csh";
-               	args[1] = "-f";
-               	args[2] = "-c";
-               	args[3]	= cmdString;
+               	strcpy(args[0],"csh");
+               	strcpy(args[1],"-f");
+               	strcpy(args[2] ,"-c");
+               	strcpy(args[3],cmdString);
                	args[4] = NULL; //Necessary for csh to work
                	execvp(args[0], args);
   				//If we got here that means execvp failed.
