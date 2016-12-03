@@ -160,7 +160,6 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			globalCmdPID = jobToFg.getPid();	//save command pid for signals
 			globalCmdName = jobToFg.getName();	//save command name for signals
 			cout << jobToFg.getName() << endl;	//print job name
-
 			//Delete the job before running it in fg to initialize time
 			jobs->deleteJob(jobToFg.getPid()); //Remove from job list before running it
 
@@ -311,6 +310,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
+//FIXME problem: CTRL+Z on second job exists
 void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 {
 	int pID, status;
@@ -334,6 +334,8 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
 				globalCmdPID = pID;
 				globalCmdName = cmdString;
 				waitpid(ChildpID, &status, WUNTRACED);
+				sleep(1);//TODO maby to fix bug
+				globalCmdPID = NO_PROCESS_RUNNING;//TODO odd bug. if I remove this, causes crash  on second CTRL+Z. probably has something to do whith return address
 				globalCmdPID = NO_PROCESS_RUNNING;
 				int i =1;
 				string savedCmd = args[0];
