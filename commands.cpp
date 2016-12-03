@@ -207,17 +207,18 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
 				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;
 				jobs->changeJobRemovalStatus(jobToFg.getPid());//Note the job is only in jobs vector until it ends
-				hist->addString(string("bg"));
 			} else {//Not suspended, so no proccess to wake up. Selected job is already running
-				illegal_cmd = true;
+				//illegal_cmd = true; TODO Eitan I think it is not an illegal command, maybe just saying it doesn't make any sense to wake it up is enough
+				cout << "Selected job is already running in backround!" << endl;
 			}
+			hist->addString(savedCmd);
 		}
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "kill"))
 	{
-		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
-		if(num_arg != 2 ) {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
+		jobs->updateJobs();//Again, probably not needed
+		if(num_arg != 2 || (*args[1])[0] != "-") {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
 			illegal_cmd = true;
 		} else {
 			int sigToSend = atoi(strtok(args[1],"-"));
@@ -259,6 +260,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		}
 	}
 	/*************************************************/
+	//TODO Eitan please clean this up. I don't know what is needed here and what not.
 	//FIXME currently has issue. suspended procs always take more that 5 seconds, so SIGKILL is sent.
 	//Is it normal? should this procs get SIGCONT first?
 	//FIXME We always wait 5 seconds for each proc of "quit kill", even if it ended beforehand. I think it's ok, you?
@@ -298,6 +300,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
  		ExeExternal(args, cmdString, hist);
 	 	return 0;
 	}
+	//For all the cases where we decided the command is illegal
 	if (illegal_cmd == true)
 	{
 		printf("smash error: > \"%s\"\n", cmdString);
@@ -359,10 +362,7 @@ int ExeComp(char* cmdString, CmdHistory* hist)
     if ((strstr(cmdString, "|")) || (strstr(cmdString, "<")) || (strstr(cmdString, ">")) || (strstr(cmdString, "*")) || (strstr(cmdString, "?")) || (strstr(cmdString, ">>")) || (strstr(cmdString, "|&")))
     {
     	int pID, status;
-    	/*const char *args[MAX_ARG];
-    	args[0] = "csh";
-       	args[1] = "-f";
-       	args[2] = "-c";*/
+
         switch(pID = fork()) {
         	case ERROR_VALUE:
     			//Error of "fork"
