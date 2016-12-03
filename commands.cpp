@@ -32,10 +32,11 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = false; // illegal command
     	cmd = strtok(lineSize, delimiters);
-	if (cmd == NULL)
+	if (cmd == NULL) {
 		return 0; 
+	}
    	args[0] = cmd;
-	for (i=1; i<MAX_ARG; i++)
+	for (i = 1; i < MAX_ARG; i++)
 	{
 		args[i] = strtok(NULL, delimiters); 
 		if (args[i] != NULL) 
@@ -48,23 +49,23 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 // MORE IF STATEMENTS AS REQUIRED
 /*************************************************/
 
-	if (!strcmp(cmd, "cd") ) //FIXME not good enough according to faq, look at the command error
+	if (!strcmp(cmd, "cd")) //FIXME not good enough according to faq, look at the command error
 	{
 		int ChangeDirRes = ERROR_VALUE;
-		if(!getcwd(pwd,MAX_LINE_SIZE)) {
+		if (!getcwd(pwd,MAX_LINE_SIZE)) {
 			perror("getcwd error");
 		}
 
 		//verifying only 1 argument. An error should be print as illegal cmd
-		if(num_arg != 1) {
+		if (num_arg != 1) {
 			illegal_cmd = true;
 
-		} else if(!strcmp(args[1],"-")) {				//change to last dir
-			if(LastPath == NULL) {
+		} else if (!strcmp(args[1],"-")) {				//change to last dir
+			if (LastPath == NULL) {
 				illegal_cmd = true;
 			} else {
 				ChangeDirRes = chdir(LastPath);
-				if(ChangeDirRes == ERROR_VALUE){ 		//Error occured
+				if (ChangeDirRes == ERROR_VALUE){ 		//Error occured
 					perror("chdir error");		//TODO The pdf says we should do a specific error.
 				} else {						//Directory change succeeded
 					cout << LastPath << endl;
@@ -75,7 +76,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 
 		} else {								//Changing to a new path
 			ChangeDirRes = chdir(args[1]);
-			if(ChangeDirRes == ERROR_VALUE){ 		//Error occured while switching
+			if (ChangeDirRes == ERROR_VALUE){ 		//Error occured while switching
 				perror("chdir error");		//TODO
 			} else {						//Directory change succeeded
 				strcpy(LastPath,pwd);
