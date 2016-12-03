@@ -31,7 +31,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	const char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = false; // illegal command
-    	cmd = strtok(lineSize, delimiters);
+    cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL) {
 		return 0; 
 	}
@@ -409,7 +409,6 @@ int ExeComp(char* cmdString, CmdHistory* hist)
 int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 {
 	jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
-	char* Command;
 	const char* delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&') {//If it is a command to background

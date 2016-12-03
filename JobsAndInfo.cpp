@@ -145,6 +145,7 @@ int JobsVect::getJobIDByPID(int pid) {
 	return id;
 }
 
+
 /**
  * A simple function for checking if a string represents a number.
  */
@@ -152,7 +153,7 @@ bool isNum(const char* str) {
 	if (!str) {
 		return false;
 	}
-	for (int i = 0; str[i] != NULL ; i++) {
+	for (int i = 0; str[i] != '\0' ; i++) {
 		if(str[i] > '9' || str[i] < '0') {
 			return false;
 		}
