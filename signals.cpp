@@ -26,7 +26,18 @@ void handle_CTRL_z(int sig_num) {
 		return;
 	}
 	else if (kill(globalCmdPID, SIGTSTP) == KILL_SUCCESS) {
+		// FIXME testing:
+		/*int jobID = jobs->getJobIDByPID(globalCmdPID);
+		cout << "jobID=" << jobID << endl;
+		cout << "globalCmdPID=" << globalCmdPID << endl;
+		cout << "globalCmdName=" << globalCmdName << endl;*/
 		jobs->insertJob(globalCmdName, globalCmdPID, JOB_WAS_SUSPENDED);
+		//jobs->insertJob(tempJob.getName(), tempJob.getPid(), JOB_WAS_SUSPENDED);
+		/*Job tempJob = jobs->getJobById(jobID);
+		cout << "jobPID=" << tempJob.getPid() << endl;
+		cout << "jobName=" << tempJob.getName() << endl;*/
+		////////////////////////////////
+		//cout << globalCmdName << " pid: " << globalCmdPID << endl;//TODO debug
 		cout << " CTRL+Z: killed process" << endl; //TODO make better
 		cout << "smash > signal SIGTSTP was sent to pid " << globalCmdPID << endl;
 		globalCmdPID = NO_PROCESS_RUNNING;

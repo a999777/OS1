@@ -36,6 +36,12 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		return 0;
 	}
    	args[0] = cmd;
+	//FIXME added this for debugging:
+    /*args[0] = strtok(lineSize, delimiters);
+	if (args[0] == NULL) {
+		return 0;
+	}*/
+	/////////
 	for (i = 1; i < MAX_ARG; i++)
 	{
 		args[i] = strtok(NULL, delimiters);
@@ -211,6 +217,47 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		}
 	}
 	/*************************************************/
+	//TODO Eitan please clean this up. I don't know what is needed here and what not.
+	//FIXME currently has issue. suspended procs always take more that 5 seconds, so SIGKILL is sent.
+	//Is it normal? should this procs get SIGCONT first?
+	//FIXME We always wait 5 seconds for each proc of "quit kill", even if it ended beforehand. I think it's ok, you?
+	else if (!strcmp(cmd, "quit"))
+	{
+		//cout << "quit 1" << endl;//TODO testing
+		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
+   		if (num_arg < 0 || num_arg > 1) {//Validate number of arguments
+		   	cout << "quit illegal" << endl;//TODO testing
+   			illegal_cmd = true;
+   		} else if (num_arg == 0) { //normal quit
+		   	cout << "quit exit(0)" << endl;//TODO testing
+   			exit(0);
+   		} else if (!(strcmp(args[1], "kill")) == false) { //there's an argument, but it's not kill
+		   	cout << "quit illegal 2" << endl;//TODO testing
+   			illegal_cmd = true;
+   		} else { //quit kill
+		   	//cout << "quit kill" << endl;//TODO testing
+   			int jobIndex = 1;//The job id in the vector
+   			Job currJob;
+   			while(jobs->isEmpty() != true) {//Go over all jobs vector
+   				currJob = jobs->getJobById(1);//Get first job in vector for each iteration
+				cout << "[" << jobIndex << "] " << currJob.getName() << "‫ –‬ ‫‪Sending‬‬ ‫‪SIGTERM...‬‬ ";
+				kill(currJob.getPid(), SIGTERM);//Try to let it kill itself
+				sleep(5);//Give the proc 5 seconds to kill itself
+				//FIXME update sleep according to: http://www.linuxprogrammingblog.com/all-about-linux-signals?page=show
+				//TODO "Simple example of signal aware code"
+				if(!(waitpid(currJob.getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
+					kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
+					cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
+				}
+				cout << "Done" << endl;
+				jobs->deleteJob(currJob.getPid());//Delete the job killed from the list
+				jobIndex++;//Advance the iterator showing the job id in job vector (not pid!)
+			}
+			//cout << "quit last" << endl;//TODO testing
+			exit(0);//FIXME should we end this way? faq doesn't point out what to do
+   		}
+	}
+		/*************************************************/
 	else if (!strcmp(cmd, "kill"))
 	{
 		jobs->updateJobs();//Again, probably not needed
@@ -256,41 +303,6 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		}
 	}
 	/*************************************************/
-	//TODO Eitan please clean this up. I don't know what is needed here and what not.
-	//FIXME currently has issue. suspended procs always take more that 5 seconds, so SIGKILL is sent.
-	//Is it normal? should this procs get SIGCONT first?
-	//FIXME We always wait 5 seconds for each proc of "quit kill", even if it ended beforehand. I think it's ok, you?
-	else if (!strcmp(cmd, "quit"))
-	{
-		jobs->updateJobs();//Make sure jobs is updated before using it TODO amit is it okay?
-   		if (num_arg < 0 || num_arg > 1) {//Validate number of arguments
-   			illegal_cmd = true;
-   		} else if (num_arg == 0) { //normal quit
-   			exit(0);
-   		} else if (!(strcmp(args[1], "kill")) == false) { //there's an argument, but it's not kill
-   			illegal_cmd = true;
-   		} else { //quit kill
-   			int jobIndex = 1;//The job id in the vector
-   			Job currJob;
-   			while(jobs->isEmpty() != true) {//Go over all jobs vector
-   				currJob = jobs->getJobById(1);//Get first job in vector for each iteration
-				cout << "[" << jobIndex << "] " << currJob.getName() << "‫ –‬ ‫‪Sending‬‬ ‫‪SIGTERM...‬‬ ";
-				kill(currJob.getPid(), SIGTERM);//Try to let it kill itself
-				sleep(5);//Give the proc 5 seconds to kill itself
-				//FIXME update sleep according to: http://www.linuxprogrammingblog.com/all-about-linux-signals?page=show
-				//TODO "Simple example of signal aware code"
-				if(!(waitpid(currJob.getPid(), NULL, WNOHANG))) { //If proccess still exists after 5 seconds
-					kill(currJob.getPid(), SIGKILL);//Proc didn't kill itself, force kill it
-					cout << "‫‫‪(5 sec passed) Sending SIGKILL... ";
-				}
-				cout << "Done" << endl;
-				jobs->deleteJob(currJob.getPid());//Delete the job killed from the list
-				jobIndex++;//Advance the iterator showing the job id in job vector (not pid!)
-			}
-			exit(0);//FIXME should we end this way? faq doesn't point out what to do
-   		}
-	}
-	/*************************************************/
 	else // external command
 	{
  		ExeExternal(args, cmdString, hist);
@@ -321,20 +333,38 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
     			perror("Failed to Create Child Process");
     			exit(1); //Only father can run this (and die)
         	case CHILD_PROCESS :
+				/*cout << "globalCmdPID: " << globalCmdPID << endl;// FIXME debug
+				globalCmdPID = getpid();//TODO for testing
+				cout << "getPID(): " << getpid() << endl;// FIXME debug
+				cout << "globalCmdPID: " << globalCmdPID << endl;// FIXME debug
+				cout << "args[0]: " << args[0] << endl;// FIXME debug
+				cout << "args[1]: " << args[1] << endl;// FIXME debug*/
+				//globalCmdPID = 0;//TODO for testing
                 // Child Process. Changing the group id.
-               	setpgrp();
+				//cout << "getpgrp(): " << getpgrp() << endl;//FIXME testing
+				if (setpgrp() == ERROR_VALUE) { //check setpgrp() success
+					cout << "setpgrp() failed!" << endl;
+				}
+				//cout << "after change- getpgrp(): " << getpgrp() << endl;//FIXME testing
+               	//setpgrp();
 			    // Execute an external command.
-               	execvp(args[0],args);
+               	execvp(args[0], args);
+				cout << "here case son" << endl;//TODO debug
 				//If we got here that means execvp failed.
                	perror("Failed to execute external command");
                	exit(1);
 			default:
+				globalCmdPID = pID;
 				//Father process. Saves the id of the child and wait for it to end
 				int ChildpID = pID;
-				globalCmdPID = pID;
 				globalCmdName = cmdString;
+				//sleep(1);
+				//cout << "here case father 1 pID: " << pID << endl;//TODO debug
 				waitpid(ChildpID, &status, WUNTRACED);
-				sleep(1);//TODO maby to fix bug
+				//waitpid(pID, &status, WUNTRACED);
+				//cout << "here case father 2" << endl;//TODO debug
+				//sleep(1);//TODO maby to fix bug
+				//cout << "here case father 3" << endl;//TODO debug
 				globalCmdPID = NO_PROCESS_RUNNING;//TODO odd bug. if I remove this, causes crash  on second CTRL+Z. probably has something to do whith return address
 				globalCmdPID = NO_PROCESS_RUNNING;
 				int i =1;
@@ -432,7 +462,7 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		    case CHILD_PROCESS :
 		        // Child Process. Changing the group id.
 		        setpgrp();
-		        execvp(args[0],args);
+		        execvp(args[0], args);
 		  		//If we got here that means execvp failed.
 		        perror("Failed to execute external command");
 		        exit(1);
