@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cctype>
 #include "signals.h"
+#include <assert.h>//TODO
 
 extern JobsVect* jobs;	//Global
 extern string globalCmdName;	//Global
@@ -55,38 +56,56 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	if (!strcmp(cmd, "cd")) //FIXME not good enough according to faq, look at the command error
 	{
 		int ChangeDirRes = ERROR_VALUE;
-		if (!getcwd(pwd,MAX_LINE_SIZE)) {
+		if (!getcwd(pwd, MAX_LINE_SIZE)) {
 			perror("getcwd error");
+			illegal_cmd = true;
+			//FIXME deal with illegal
 		}
 
 		//verifying only 1 argument. An error should be print as illegal command
-		if (num_arg != 1) {
+		if (num_arg != 1 || illegal_cmd == true) {//Added illegal_cmd check in case getcwd failed
 			illegal_cmd = true;
+			//cout << "here 1" << endl;//FIXME testing
 		} else if (!strcmp(args[1],"-")) {	//change to last dir
-			if (LastPath == NULL) {
+			if (LastPath == NULL) { //No previous path existing
 				illegal_cmd = true;
-			} else {
-				ChangeDirRes = chdir(LastPath);
-				if (ChangeDirRes == ERROR_VALUE){ //Error occured
-					perror("chdir error");
+				//cout << "here 2" << endl;//FIXME testing
+			} else { //Previous path exists
+				//cout << "here 3" << endl;//FIXME testing
+				ChangeDirRes = chdir(LastPath);//Return value
+				if (ChangeDirRes == ERROR_VALUE){ //Check success
+					//Print is made at end of "cd" section
+					//cout << "smash error: > " << args[1] << " - path not found" << endl;
+					//perror("chdir error");//FIXME
+					//cout << "here 4" << endl;//FIXME testing
 				} else {		//Directory change succeeded
 					cout << LastPath << endl;
-					strcpy(LastPath,pwd);
+					strcpy(LastPath, pwd);
 					hist->addString(string("cd -"));
+					//cout << "here 5" << endl;//FIXME testing
 				}
 			}
 
 		} else {				//Changing to a new path
 			ChangeDirRes = chdir(args[1]);
+			//cout << "here 6" << endl;//FIXME testing
 			if (ChangeDirRes == ERROR_VALUE){  //Error occured while switching
-				perror("chdir error");	//TODO The pdf says we should do a specific error Like "path doesn't exist or so". Couldn't solve it yet.
+				illegal_cmd = true;
+				//cout << "here 7" << endl;//FIXME testing
+				//Print is made at end of "cd" section
+				//perror("chdir error");	//TODO The pdf says we should do a specific error Like "path doesn't exist or so". Couldn't solve it yet.
 			} else {		//Directory change succeeded
-				strcpy(LastPath,pwd);
-				cout << args[1] << endl;
+				//cout << "here 8" << endl;//FIXME testing
+				strcpy(LastPath, pwd);
+				//cout << args[1] << endl; //Printing new path isn't required
 				string savedCmd = string("cd ");
 				savedCmd.append(args[1]);
 				hist->addString(savedCmd);
 			}
+		}
+		if (ChangeDirRes == ERROR_VALUE && illegal_cmd == false){ //Check success
+			cout << "smash error: > " << args[1] << " - path not found" << endl;
+			//perror("chdir error");//FIXME
 		}
 	}
 
@@ -200,7 +219,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 				} else if (atoi(args[1]) <= 0 || atoi(args[1]) > jobs->size()) {//Check legal input
 					illegal_cmd = true;
 				} else {
-					savedCmd += string(args[1]);
+					savedCmd += string(" ") + string(args[1]);
 					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
@@ -234,10 +253,10 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		   	cout << "quit illegal" << endl;//TODO testing
    			illegal_cmd = true;
    		} else if (num_arg == 0) { //normal quit
-		   	cout << "quit exit(0)" << endl;//TODO testing
+		   	//cout << "quit exit(0)" << endl;//TODO testing
    			exit(0);
    		} else if (!(strcmp(args[1], "kill")) == false) { //there's an argument, but it's not kill
-		   	cout << "quit illegal 2" << endl;//TODO testing
+		   	//cout << "quit illegal 2" << endl;//TODO testing
    			illegal_cmd = true;
    		} else { //quit kill
 		   	//cout << "quit kill" << endl;//TODO testing
@@ -354,7 +373,7 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString, CmdHistory* hist)
                	//setpgrp();
 			    // Execute an external command.
                	execvp(args[0], args);
-				cout << "here case son" << endl;//TODO debug
+				//cout << "here case son" << endl;//TODO debug
 				//If we got here that means execvp failed.
                	perror("Failed to execute external command");
                	exit(1);
