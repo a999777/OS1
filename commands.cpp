@@ -246,7 +246,7 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 	else if (!strcmp(cmd, "kill"))
 	{
 		jobs->updateJobs();//Again, probably not needed
-		if(num_arg != 2) {	//If the number of arguments is not correct or "-" isn't leading the second arg TODO add the "-" case
+		if(num_arg != 2 || strncmp(args[1],"-",1)) {	//If the number of arguments is not correct or "-" isn't leading the second arg
 			illegal_cmd = true;
 		} else {
 			int sigToSend = atoi(strtok(args[1],"-"));
