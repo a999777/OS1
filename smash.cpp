@@ -50,9 +50,9 @@ int main(int argc, char *argv[])
     //Heart of the program- the loop that catches and classifies the commands.
     while (1)
     {
-		//FIXME these extra 2 lines fix the bug for some unknown reason???
-		sigaction(SIGINT, &Ctrl_C, NULL);//FIXME testing
-		sigaction(SIGTSTP, &Ctrl_Z, NULL);//FIXME testing
+		//These extra 2 lines fix the bug caused only on T2
+		sigaction(SIGINT, &Ctrl_C, NULL);
+		sigaction(SIGTSTP, &Ctrl_Z, NULL);
     	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);    	
