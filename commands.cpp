@@ -423,7 +423,9 @@ int ExeComp(char* cmdString, CmdHistory* hist)
        			exit(1); //Only father can run this (and die)
             case CHILD_PROCESS :
                 // Child Process. Changing the group id.
-               	setpgrp();
+				if (setpgrp() == ERROR_VALUE) { //check setpgrp() success
+					cout << "setpgrp() failed!" << endl;
+				}
    			    // Execute an external complicated command through csh.
                	strcpy(args[0],"csh");
                	strcpy(args[1],"-f");
@@ -485,7 +487,9 @@ int BgCmd(char* lineSize, CmdHistory* hist, JobsVect* jobs)
 		       	exit(1); //Only father can run this (and die)
 		    case CHILD_PROCESS :
 		        // Child Process. Changing the group id.
-		        setpgrp();
+				if (setpgrp() == ERROR_VALUE) { //check setpgrp() success
+					cout << "setpgrp() failed!" << endl;
+				}
 		        execvp(args[0], args);
 		  		//If we got here that means execvp failed.
 		        perror("Failed to execute external command");
