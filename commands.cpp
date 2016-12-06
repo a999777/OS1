@@ -190,7 +190,10 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 		} else {
 			if(num_arg == 0) {	//default, which means last job that was inserted
 				//First find the pid of the last job to be suspended in the vector, than return that job
-				jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job
+				//jobToFg = jobs->getJobById(jobs->LastSuspendedPid());//Return relevant job TODO
+				jobToFg = jobs->getJobById();//Return relevant job
+				//cout << "jobToFg.getName()" << jobToFg.getName() << endl;//FIXME testing
+				//cout << "jobToFg.getPid()" << jobToFg.getPid() << endl;//FIXME testing
 			} else if (num_arg == 1) {		//A parameter for jobs list given
 				if (!(isNum(args[1]))) {	//If we are given a char that is not a number
 					illegal_cmd = true;
@@ -205,9 +208,11 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			}
 		}
 		if (!illegal_cmd) { //If command is legal
+			//cout << "check" << endl;//FIXME testing
 			hist->addString(savedCmd);
 			cout << jobToFg.getName() << endl;	//print job name
 			if (jobToFg.isSuspended()) { 		//Handle suspended command, if suspended- wake it up
+				//cout << "check 2" << endl;//FIXME testing
 				kill(jobToFg.getPid(), SIGCONT);//Wake it up
 				jobs->changeJobRemovalStatus(jobToFg.getPid());//Notify the job isn't suspended anymore
 				cout << "smash > signal SIGCONT was sent to pid " << jobToFg.getPid() << endl;

@@ -119,6 +119,7 @@ int JobsVect::LastSuspendedPid() {
  */
 Job JobsVect::getJobById(int id) {
 		if(id == -1) {
+			//cout << "check id = -1" << endl;//FIXME testing
 			return *(this->_allJobs.end() - 1);
 		} else {
 			unsigned int unsignedID = id;
