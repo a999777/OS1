@@ -95,37 +95,13 @@ void JobsVect::updateJobs() {
 }
 
 /**
- * A method for getting the latest suspended process. This is needed in order to
- * enable the "fg" command with no arguments.
- */
-int JobsVect::LastSuspendedPid() {
-	this->updateJobs();
-	int mostRecentPid = -1;
-	if (this->_allJobs.begin()->isSuspended()) {
-		return this->_allJobs.begin()->getPid();
-	}
-	vector<Job>::iterator it = this->_allJobs.end() - 1;
-	while (it != this->_allJobs.begin()) {
-		if (it->isSuspended()) {
-			mostRecentPid = it->getPid();
-		}
-		it--;
-	}
-	return mostRecentPid;
-}
-
-/**
  * A method for getting a job based on its location in the jobs list.
  */
 Job JobsVect::getJobById(int id) {
 		if(id == -1) {
-			//cout << "check id = -1" << endl;//FIXME testing
 			return *(this->_allJobs.end() - 1);
 		} else {
 			unsigned int unsignedID = id;
-			/*cout << "id" << id << endl;//TODO testing
-			cout << "unsignedID" << unsignedID << endl;//TODO testing
-			cout << "this->_allJobs.size()" << this->_allJobs.size() << endl;//TODO testing*/
 			if(id < 1 || unsignedID > (this->_allJobs.size())) {
 				return Job();
 			}

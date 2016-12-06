@@ -95,10 +95,9 @@ public:
 	void deleteJob(int processId);
 	void printAll();
 	void updateJobs();
-	int LastSuspendedPid();
 	Job getJobById(int id = -1);
 	int getJobIDByPID(int pid);
-	void changeJobRemovalStatus(int pid) {//TODO not sure
+	void changeJobRemovalStatus(int pid) {
 		(this->_allJobs[getJobIDByPID(pid) - 1]).reverseSuspensionStatus();
 	}
 	bool isEmpty() {
