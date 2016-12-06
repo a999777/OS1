@@ -149,10 +149,10 @@ int ExeCmd(char* lineSize, char* cmdString, char* LastPath, CmdHistory* hist)
 			} else if (num_arg == 1) { //A parameter for jobs list given
 				if (!(isNum(args[1]))) {//If we are given a char that is not a number
 					illegal_cmd = true;
-				} else if (atoi(args[1]) <= 0 || atoi(args[1]) >= jobs->size()) {//Check legal input
+				} else if (atoi(args[1]) <= 0 || atoi(args[1]) > jobs->size()) {//Check legal input
 					illegal_cmd = true;
 				} else {
-					savedCmd += string(args[1]);
+					savedCmd += string(" ") + string(args[1]);
 					jobToFg = jobs->getJobById(atoi(args[1]));//Return relevant job
 				}
 			} else { //if we get more than 1 argument
